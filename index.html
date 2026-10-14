@@ -1,0 +1,421 @@
+<title>Keyflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow centred column for reading, with full-bleed screenshot
+   bands breaking out of it. Committed to a single dark look, because the
+   product is pitch black and the page should be the same object.
+   The only colour on this page comes from the real brand marks inside the
+   screenshots. */
+:root{
+  --ink:#000;            /* pitch black, the app's own background */
+  --panel:#0e0e0e;
+  --panel2:#161616;
+  --line:#242424;
+  --line2:#3a3a3a;
+  --fg:#fff;
+  --mut:#8c8c8c;
+  --mut2:#626262;
+
+  --display:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --f-mega:clamp(56px,13vw,132px);
+  --f-h2:clamp(28px,4.4vw,46px);
+  --f-h3:clamp(19px,2.2vw,23px);
+  --f-body:clamp(15px,1.5vw,17px);
+  --f-small:13.5px;
+  --f-micro:11.5px;
+
+  --col:min(1120px,100%);
+  --read:64ch;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ink);color:var(--fg);
+  font:400 var(--f-body)/1.65 var(--display);
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em;
+  overflow-x:hidden;
+}
+.wrap{width:var(--col);margin-inline:auto;padding-inline:20px}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.035em;text-wrap:balance;line-height:1.04}
+p{margin:0}
+a{color:inherit}
+/* height:auto matters: the <img> tags carry width/height attributes so the
+   browser reserves the right space before the file arrives, and without
+   this the explicit height wins and every screenshot is squashed. */
+img{max-width:100%;height:auto;display:block}
+
+/* small caps label, used to mark every section */
+.eyebrow{
+  font:600 var(--f-micro)/1 var(--mono);letter-spacing:.17em;text-transform:uppercase;
+  color:var(--mut2);
+}
+
+/* ---------------- hero ---------------- */
+.hero{padding-block:clamp(56px,9vw,104px) clamp(40px,6vw,72px);text-align:center}
+.mark{
+  width:76px;height:76px;margin:0 auto 26px;border-radius:21px;
+  background:var(--fg);display:flex;align-items:center;justify-content:center;
+}
+.mark svg{width:42px;height:42px;display:block}
+/* the quiet line above the wordmark: says what it is, so the wordmark
+   only has to say what it is called */
+.kick{
+  font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--mut);margin:0 0 10px;
+}
+.hero h1{
+  font-size:var(--f-mega);font-weight:900;letter-spacing:-.055em;
+  margin-bottom:18px;
+}
+.lede{
+  font-size:clamp(17px,2.1vw,22px);color:var(--mut);max-width:30ch;
+  margin:0 auto;line-height:1.45;letter-spacing:-.018em;
+}
+.lede b{color:var(--fg);font-weight:600}
+
+/* ---------------- the download control ---------------- */
+.getbox{margin-top:38px;display:flex;flex-direction:column;align-items:center;gap:13px}
+.get{
+  display:inline-flex;align-items:center;gap:13px;
+  background:var(--fg);color:var(--ink);text-decoration:none;
+  font:800 17px/1 var(--display);letter-spacing:-.02em;
+  padding:19px 34px;border-radius:999px;border:0;cursor:pointer;
+  transition:transform .14s cubic-bezier(.22,1,.36,1),box-shadow .2s;
+  box-shadow:0 0 0 0 rgba(255,255,255,.22);
+}
+.get:hover{transform:translateY(-2px);box-shadow:0 10px 34px -8px rgba(255,255,255,.3)}
+.get:active{transform:translateY(0)}
+.get:focus-visible{outline:2px solid var(--fg);outline-offset:4px}
+.get svg{width:19px;height:19px;flex:0 0 auto}
+.getsub{font:400 var(--f-small)/1.5 var(--mono);color:var(--mut2);letter-spacing:-.01em}
+.getsub a{color:var(--mut);text-underline-offset:3px}
+
+/* ---------------- the big screen ---------------- */
+.screenband{margin-top:clamp(44px,6vw,76px);position:relative}
+.screenband::after{  /* the shot fades into the page instead of ending in a hard edge */
+  content:"";position:absolute;inset:auto 0 -1px 0;height:34%;
+  background:linear-gradient(to bottom,transparent,var(--ink));pointer-events:none;
+}
+.shot{
+  width:var(--col);margin-inline:auto;border:1px solid var(--line);
+  border-radius:16px;overflow:hidden;background:var(--panel);
+}
+.shot.flush{border-radius:16px 16px 0 0;border-bottom:0}
+.chrome{
+  display:flex;align-items:center;gap:7px;padding:11px 15px;
+  border-bottom:1px solid var(--line);background:var(--panel2);
+}
+.chrome i{width:10px;height:10px;border-radius:50%;background:var(--line2);display:block}
+.chrome span{
+  margin-left:9px;font:500 var(--f-micro)/1 var(--mono);color:var(--mut2);letter-spacing:.04em;
+}
+
+/* ---------------- the three numbers ---------------- */
+.facts{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  margin-block:clamp(40px,6vw,72px);
+}
+.fact{background:var(--ink);padding:26px 22px}
+.fact b{
+  display:block;font:600 clamp(21px,2.6vw,27px)/1.1 var(--mono);
+  letter-spacing:-.03em;margin-bottom:7px;font-variant-numeric:tabular-nums;
+}
+.fact span{display:block;font-size:var(--f-small);color:var(--mut);line-height:1.5}
+
+/* ---------------- prose sections ---------------- */
+section{padding-block:clamp(44px,6.5vw,86px);border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.sechead{display:flex;flex-direction:column;gap:14px;max-width:var(--read)}
+.sechead h2{font-size:var(--f-h2)}
+.sechead p{color:var(--mut);font-size:clamp(16px,1.7vw,18.5px);line-height:1.6}
+.sechead p + p{margin-top:12px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,56px);align-items:center}
+.split .shot{width:100%}
+
+/* ---------------- feature list ---------------- */
+.feats{list-style:none;margin:34px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.feats li{background:var(--ink);padding:22px 21px}
+.feats h3{font-size:var(--f-h3);margin-bottom:8px;letter-spacing:-.028em}
+.feats p{color:var(--mut);font-size:var(--f-small);line-height:1.6}
+
+/* ---------------- the plain-dealing section ---------------- */
+.plain{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:clamp(24px,3.4vw,38px);margin-top:34px}
+.plain dl{margin:0;display:grid;gap:22px}
+.plain dt{font:600 var(--f-small)/1.4 var(--mono);letter-spacing:.02em;margin-bottom:5px}
+.plain dd{margin:0;color:var(--mut);font-size:var(--f-small);line-height:1.62;max-width:var(--read)}
+
+/* ---------------- all platforms ---------------- */
+.plats{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.plat{background:var(--ink);display:flex;align-items:center;justify-content:space-between;
+  gap:18px;padding:17px 21px;flex-wrap:wrap}
+.plat b{font-size:15.5px;font-weight:600;letter-spacing:-.02em}
+.plat span{display:block;color:var(--mut2);font:400 var(--f-small)/1.45 var(--mono)}
+.plat a{
+  font:600 13.5px/1 var(--display);text-decoration:none;color:var(--ink);background:var(--fg);
+  padding:11px 19px;border-radius:999px;white-space:nowrap;flex:0 0 auto;
+  transition:opacity .15s}
+.plat a:hover{opacity:.84}
+.plat a.ghost{background:transparent;color:var(--fg);border:1px solid var(--line2)}
+
+footer{border-top:1px solid var(--line);padding-block:40px 56px;color:var(--mut2);
+  font:400 var(--f-small)/1.7 var(--mono)}
+footer a{color:var(--mut);text-underline-offset:3px}
+.foot-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+
+@media (max-width:860px){
+  .split{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6" fill="#000"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" stroke="#000" stroke-width="2.1" stroke-linecap="round"/></svg>
+    </div>
+    <p class="kick">Password vault</p>
+    <h1>Keyflow</h1>
+    <p class="lede">Your passwords as <b>one encrypted file you own</b>, not an account you rent.</p>
+
+    <div class="getbox">
+      <a class="get" id="get" href="https://github.com/OWNER/REPO/releases/latest">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="getlabel">Download for macOS</span>
+      </a>
+      <p class="getsub" id="getsub">Apple Silicon &middot; macOS 10.15 or later &middot; free</p>
+    </div>
+  </header>
+
+  <div class="screenband">
+    <div class="shot flush">
+      <div class="chrome"><i></i><i></i><i></i><span>Keyflow</span></div>
+      <img src="shot-vault.png" width="1180" height="860"
+           alt="The Keyflow window listing saved logins with their real brand marks: Netflix, Spotify, YouTube, GitHub, Figma and others, with a search bar above them.">
+    </div>
+  </div>
+
+  <div class="facts">
+    <div class="fact"><b>AES-256-GCM</b><span>The same cipher the file would be protected with if a bank wrote it. Tampering is detected, not silently accepted.</span></div>
+    <div class="fact"><b>600,000</b><span>PBKDF2 rounds between your master password and the key. Every guess an attacker makes costs them that much work.</span></div>
+    <div class="fact"><b>1 host</b><span>The app is allowed to reach exactly one address on the internet, and only if you switch sync on. With it off, nothing leaves.</span></div>
+  </div>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">Where your data lives</p>
+      <h2>Three places. You can name all of them.</h2>
+      <p>Most password managers answer this question with a brand name. Keyflow answers it with a file path, a folder, and a row you can check.</p>
+    </div>
+
+    <ul class="feats">
+      <li>
+        <h3>The file</h3>
+        <p>One <code>.vault</code> file, encrypted, wherever you put it. Put it in iCloud Drive and your Mac and your phone both have it. No step two.</p>
+      </li>
+      <li>
+        <h3>This computer</h3>
+        <p>An encrypted duplicate so the app opens without hunting for the file. Switchable off. Your PIN and fingerprint live only here and are never written into the file.</p>
+      </li>
+      <li>
+        <h3>A server, if you want one</h3>
+        <p>Off by default. Switched on, an encrypted blob goes up so a dead laptop is recoverable from the master password alone. The server holds ciphertext and cannot read it.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="split">
+      <div class="sechead">
+        <p class="eyebrow">Checked, not claimed</p>
+        <h2>It tests each place and tells you.</h2>
+        <p>A tick means the app wrote a test file into that folder and deleted it, and found the provider&rsquo;s sync process running. Not that a setting is switched on.</p>
+        <p>No operating system will tell an app whether a cloud upload has actually finished. The panel says that out loud rather than showing you a hopeful tick.</p>
+      </div>
+      <div class="shot">
+        <img src="shot-where.png" width="1180" height="860"
+             alt="The Where it's saved panel: iCloud Drive and Google Drive ticked, OneDrive flagged as installed but not running, Dropbox marked as not set up.">
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="split">
+      <div class="shot">
+        <img src="shot-looks.png" width="1180" height="860"
+             alt="The appearance settings: a row of app icon marks — cube, key, trading chart, trend line, smiley — on dark and light tiles, and a text size control.">
+      </div>
+      <div class="sechead">
+        <p class="eyebrow">How it looks</p>
+        <h2>Black and white. Nothing to tune.</h2>
+        <p>One look: white on pitch black, the same object as the app itself. No themes and no accent colours &mdash; nothing to pick but the text size, if you want the type larger.</p>
+        <p>The one thing you choose is the app icon: five marks &mdash; a cube (the default), the Keyflow key, a trading chart, a trend line, a red smiley &mdash; or a picture of your own, on a dark or light tile. It changes the lock screen and the browser tab on the spot, and one saved file carries it into the next build so the icon in your dock matches.</p>
+        <p>Unlocking with a PIN takes about sixty milliseconds. Switching tabs is immediate. Those are measured numbers, not impressions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">Before you download it</p>
+      <h2>The things that will annoy you.</h2>
+      <p>Better you read them here than find them out later.</p>
+    </div>
+    <div class="plain">
+      <dl>
+        <div>
+          <dt>There is no password recovery</dt>
+          <dd>Not a policy. There is no mechanism: nobody holds a copy of your key, so nobody can reset it. Write the master password down somewhere physical before you put anything important in.</dd>
+        </div>
+        <div>
+          <dt>macOS will warn you once</dt>
+          <dd>The app is not code-signed, because that costs a yearly fee to Apple. On an Intel Mac, right-click the app and choose Open, then Open again &mdash; once only. On Apple Silicon (M1&ndash;M4) macOS may instead say the app is &ldquo;damaged&rdquo;: that is the same unsigned warning, not a real problem. Drag Keyflow to Applications, then run this once in Terminal &mdash; <code>xattr -dr com.apple.quarantine /Applications/Keyflow.app</code> &mdash; and open it normally. Windows SmartScreen: More info, then Run anyway.</dd>
+        </div>
+        <div>
+          <dt>Touch ID does not work on Linux</dt>
+          <dd>The system web view on Linux ships no passkey support at all. On macOS and Windows the blocker that prevented it is gone, but that has not yet been confirmed on real hardware. The app says which case you are in rather than offering a button that fails.</dd>
+        </div>
+        <div>
+          <dt>Anyone who can read this computer can get the PIN</dt>
+          <dd>The PIN is a convenience on a machine you trust. It opens the vault instantly and dies after ten wrong tries, and it never leaves the device, so a stolen file or server dump has no PIN in it to attack. Your master password is the actual lock.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead">
+      <p class="eyebrow">Every build</p>
+      <h2>Pick your machine.</h2>
+    </div>
+    <ul class="plats" id="plats">
+      <li class="plat"><div><b>macOS &middot; Apple Silicon</b><span>M1 and later &middot; .dmg</span></div><a data-rx="aarch64.*\.dmg$|_aarch64\.dmg$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
+      <li class="plat"><div><b>macOS &middot; Intel</b><span>2020 and earlier &middot; .dmg</span></div><a data-rx="x64.*\.dmg$|x86_64.*\.dmg$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
+      <li class="plat"><div><b>Windows</b><span>Windows 10 and 11 &middot; .msi</span></div><a data-rx="\.msi$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
+      <li class="plat"><div><b>Linux</b><span>.AppImage, runs as-is</span></div><a data-rx="\.AppImage$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
+      <li class="plat"><div><b>Linux &middot; Debian, Ubuntu</b><span>.deb</span></div><a data-rx="\.deb$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
+      <li class="plat"><div><b>No install at all</b><span>the single HTML file, open it in any browser</span></div><a class="ghost" data-rx="\.html$" href="https://github.com/OWNER/REPO/releases/latest">Get the file</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    <div class="foot-row">
+      <div>Keyflow &middot; offline encrypted password manager</div>
+      <div>
+        <a href="https://github.com/OWNER/REPO">Source</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/OWNER/REPO/releases">All releases</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/OWNER/REPO/blob/main/README.md">Build it yourself</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* The download buttons point at the newest release, resolved at load time,
+   so nobody has to remember to edit a version number into this page.
+   If the request cannot be made (offline, or a preview that blocks it),
+   every button is already a working link to the releases page, so the
+   page degrades to something correct rather than to something broken. */
+/* A screenshot that fails to load would leave a broken frame on the page,
+   so the frame removes itself instead. The page then reads as a shorter
+   version of itself rather than a damaged one. */
+document.querySelectorAll(".shot img").forEach(function(img){
+  img.addEventListener("error", function(){
+    var shot = img.closest(".shot");
+    var band = img.closest(".screenband");
+    (band || shot || img).remove();
+  });
+});
+
+(function(){
+  /* Work out which repository this page belongs to from its own address,
+     so the file needs no find-and-replace and keeps working if it is ever
+     forked or renamed. On github.io the owner is the hostname and the repo
+     is the first path segment. */
+  var REPO = "OWNER/REPO";
+  var m = location.hostname.match(/^([^.]+)\.github\.io$/i);
+  if (m) {
+    var seg = location.pathname.split("/").filter(Boolean)[0];
+    REPO = m[1] + "/" + (seg || m[1] + ".github.io");
+  }
+  /* point every static fallback at the right releases page */
+  document.querySelectorAll('a[href*="OWNER/REPO"]').forEach(function(a){
+    a.href = a.getAttribute("href").replace("OWNER/REPO", REPO);
+  });
+  var byName = {};
+
+  function pick(rx){
+    for (var n in byName) { if (new RegExp(rx, "i").test(n)) return byName[n]; }
+    return null;
+  }
+
+  /* Which build this visitor most likely wants. */
+  function guess(){
+    var p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+    var ua = navigator.userAgent || "";
+    if (/Mac/i.test(p) || /Mac OS X/i.test(ua)) {
+      /* Apple Silicon does not announce itself in the UA. Every Mac on
+         macOS 11+ is far likelier to be ARM now, and the Intel build is
+         one row down for the handful that are not. */
+      var intel = /Intel/i.test(ua) && /Mac OS X 10_(9|10|11|12|13|14)/.test(ua);
+      return { label:"Download for macOS", sub: intel
+          ? "Intel · macOS 10.15 or later · free"
+          : "Apple Silicon · macOS 10.15 or later · free",
+        rx: intel ? "x64.*\\.dmg$|x86_64.*\\.dmg$" : "aarch64.*\\.dmg$|_aarch64\\.dmg$" };
+    }
+    if (/Win/i.test(p) || /Windows/i.test(ua))
+      return { label:"Download for Windows", sub:"Windows 10 and 11 · .msi · free", rx:"\\.msi$" };
+    if (/Linux/i.test(p) || /Linux/i.test(ua))
+      return { label:"Download for Linux", sub:".AppImage, runs as-is · free", rx:"\\.AppImage$" };
+    return { label:"Download Keyflow", sub:"pick your machine below · free", rx:null };
+  }
+
+  var g = guess();
+  var btn = document.getElementById("get");
+  document.getElementById("getlabel").textContent = g.label;
+  document.getElementById("getsub").innerHTML = g.sub +
+    ' · <a href="#plats">other platforms</a>';
+
+  fetch("https://api.github.com/repos/" + REPO + "/releases/latest")
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(rel){
+      (rel.assets || []).forEach(function(a){ byName[a.name] = a.browser_download_url; });
+      if (g.rx) { var u = pick(g.rx); if (u) btn.href = u; }
+      document.querySelectorAll("#plats a[data-rx]").forEach(function(a){
+        var u = pick(a.getAttribute("data-rx"));
+        if (u) { a.href = u; }
+        else { a.textContent = "Not in this build"; a.classList.add("ghost"); }
+      });
+      if (rel.tag_name) {
+        var f = document.querySelector("footer .foot-row div");
+        f.textContent = f.textContent + " · " + rel.tag_name;
+      }
+    })
+    .catch(function(){
+      /* No release has been published yet. Rather than sending people to an
+         empty "no releases" page, say so plainly and keep the links pointed
+         at the releases page for when the first build lands. */
+      var lbl=document.getElementById("getlabel");
+      if(lbl) lbl.textContent="Builds coming soon";
+      var sub=document.getElementById("getsub");
+      if(sub) sub.innerHTML="the installers are being prepared &middot; " +
+        '<a href="https://github.com/' + REPO + '/blob/main/README.md">build it yourself</a>';
+      document.querySelectorAll("#plats a[data-rx]").forEach(function(a){
+        a.textContent="Coming soon"; a.classList.add("ghost");
+      });
+    });
+})();
+</script>
