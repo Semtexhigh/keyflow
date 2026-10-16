@@ -704,7 +704,9 @@ function a0_0x3d60(_0x1ef103,_0x204c64){var _0x55e83a=a0_0x55e8();return a0_0x3d
   function cmdFor(k){
     var d=DEV[k];
     if(d.os==="mac"){
-      var u=pick(d.cmdrx)||RELEASES;
+      // version-less asset names -> GitHub's stable latest/download URL, no API needed
+      var nm=(k==="intel")?"Keyflow_x64.app.tar.gz":"Keyflow_aarch64.app.tar.gz";
+      var u="https://github.com/Semtexhigh/keyflow/releases/latest/download/"+nm;
       return 'mkdir -p ~/Applications && cd ~/Applications && curl -#L "'+u+'" | tar xz && xattr -dr com.apple.quarantine Keyflow.app && open Keyflow.app';
     }
     if(d.os==="win"){
