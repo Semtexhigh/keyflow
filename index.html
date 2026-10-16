@@ -343,6 +343,33 @@ footer a{color:var(--mut);text-underline-offset:3px}
   .slab,.split .shot,.split:nth-of-type(odd) .shot{transform:none!important}
   .orb{transform:none!important}
 }
+
+/* CSS-drawn product mockups — no raster screenshots, on-brand with the page */
+.winbody{padding:20px;display:grid;gap:11px}
+.winsearch{height:40px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--edge);display:flex;align-items:center;gap:10px;padding:0 15px;color:var(--mut2);font:400 13.5px/1 var(--display)}
+.winsearch svg{width:15px;height:15px}
+.winrow{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--edge)}
+.winav{width:38px;height:38px;border-radius:11px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+.winmeta{flex:1;min-width:0;display:grid;gap:8px}
+.winmeta i{display:block;height:10px;border-radius:4px}
+.winmeta .l1{width:38%;background:rgba(255,255,255,.55)}
+.winmeta .l2{width:60%;height:8px;background:rgba(255,255,255,.2)}
+.winpill{width:34px;height:20px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--edge);flex:0 0 auto;position:relative}
+.winpill::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.4)}
+.mock{padding:20px;display:grid;gap:11px}
+.mockrow{display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--edge)}
+.mockrow .sd{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+.mockrow .mt{flex:1;min-width:0;display:grid;gap:7px}
+.mockrow .mt i{display:block;height:10px;border-radius:4px}
+.mockrow .mt .a{width:44%;background:rgba(255,255,255,.55)}
+.mockrow .mt .b{width:66%;height:8px;background:rgba(255,255,255,.2)}
+.mockrow .tag2{font:600 10px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--edge);color:var(--mut);flex:0 0 auto}
+.icons{display:flex;gap:12px;flex-wrap:wrap;padding:22px 22px 8px}
+.icons .ic{width:54px;height:54px;border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.sizewrap{padding:10px 22px 24px}
+.sizebar{height:10px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--edge);position:relative}
+.sizebar span{position:absolute;left:0;top:-1px;bottom:-1px;width:46%;border-radius:999px;background:linear-gradient(90deg,var(--aqua),var(--violet))}
+.sizebar b{position:absolute;left:44%;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;transform:translateY(-50%);box-shadow:0 3px 10px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -382,8 +409,14 @@ footer a{color:var(--mut);text-underline-offset:3px}
   <div class="screenband">
     <div class="slab">
       <div class="chrome"><i></i><i></i><i></i><span>Keyflow</span></div>
-      <img src="shot-vault.png" width="1180" height="860"
-           alt="The Keyflow window listing saved logins with their real brand marks: Netflix, Spotify, YouTube, GitHub, Figma and others, with a search bar above them.">
+      <div class="winbody">
+        <div class="winsearch"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.4" stroke="currentColor" stroke-width="2"/><path d="m15.8 15.8 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Search</div>
+        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#ff5ea8,#8b5cff)"></span><div class="winmeta"><i class="l1"></i><i class="l2"></i></div><span class="winpill"></span></div>
+        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#39d8ff,#57ffc4)"></span><div class="winmeta"><i class="l1" style="width:30%"></i><i class="l2" style="width:52%"></i></div><span class="winpill"></span></div>
+        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#ffd579,#ff5ea8)"></span><div class="winmeta"><i class="l1" style="width:44%"></i><i class="l2" style="width:66%"></i></div><span class="winpill"></span></div>
+        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#8b5cff,#39d8ff)"></span><div class="winmeta"><i class="l1" style="width:34%"></i><i class="l2" style="width:58%"></i></div><span class="winpill"></span></div>
+        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#57ffc4,#39d8ff)"></span><div class="winmeta"><i class="l1" style="width:40%"></i><i class="l2" style="width:48%"></i></div><span class="winpill"></span></div>
+      </div>
     </div>
   </div>
 
@@ -414,19 +447,28 @@ footer a{color:var(--mut);text-underline-offset:3px}
         <p>A tick means the app wrote a test file into that folder and deleted it, and found the provider&rsquo;s sync process running. Not that a setting is switched on.</p>
         <p>No operating system will tell an app whether a cloud upload has actually finished. The panel says that out loud rather than showing you a hopeful tick.</p>
       </div>
-      <div class="shot">
-        <img src="shot-where.png" width="1180" height="860"
-             alt="The Where it's saved panel: iCloud Drive and Google Drive ticked, OneDrive flagged as installed but not running, Dropbox marked as not set up.">
-      </div>
+      <div class="shot"><div class="mock">
+          <div class="mockrow"><span class="sd" style="background:#57ffc4;box-shadow:0 0 10px #57ffc4"></span><div class="mt"><i class="a"></i><i class="b" style="width:52%"></i></div><span class="tag2">Synced</span></div>
+          <div class="mockrow"><span class="sd" style="background:#57ffc4;box-shadow:0 0 10px #57ffc4"></span><div class="mt"><i class="a" style="width:38%"></i><i class="b" style="width:60%"></i></div><span class="tag2">Synced</span></div>
+          <div class="mockrow"><span class="sd" style="background:#ffd579;box-shadow:0 0 10px #ffd579"></span><div class="mt"><i class="a" style="width:42%"></i><i class="b" style="width:70%"></i></div><span class="tag2">Not running</span></div>
+          <div class="mockrow"><span class="sd" style="background:#4a4f66"></span><div class="mt"><i class="a" style="width:34%"></i><i class="b" style="width:50%"></i></div><span class="tag2">Not set up</span></div>
+        </div></div>
     </div>
   </section>
 
   <section>
     <div class="split">
-      <div class="shot">
-        <img src="shot-looks.png" width="1180" height="860"
-             alt="The appearance settings: a row of app icon marks on dark and light tiles, and a text size control.">
-      </div>
+      <div class="shot"><div>
+        <div class="icons">
+          <span class="ic" style="background:linear-gradient(135deg,#8b5cff,#39d8ff)"></span>
+          <span class="ic" style="background:linear-gradient(135deg,#39d8ff,#57ffc4)"></span>
+          <span class="ic" style="background:linear-gradient(135deg,#ffd579,#ff5ea8)"></span>
+          <span class="ic" style="background:linear-gradient(135deg,#ff5ea8,#8b5cff)"></span>
+          <span class="ic" style="background:#0a0c16;border:1px solid var(--edge2)"></span>
+          <span class="ic" style="background:#eef1fb"></span>
+        </div>
+        <div class="sizewrap"><div class="sizebar"><span></span><b></b></div></div>
+      </div></div>
       <div class="sechead">
         <p class="eyebrow">How it looks</p>
         <h2>Black and white. Nothing to tune.</h2>
