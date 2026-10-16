@@ -2,573 +2,302 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Keyflow</title>
+<title>KEYFLOW</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Keyflow — your passwords as one encrypted file you own, not an account you rent.">
+<meta name="description" content="Keyflow - your passwords as one encrypted file you own.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* ======================================================================
-   Keyflow — "liquid obsidian". A single encrypted object you hold, shown
-   as a 3D glass chip inside moving liquid light. Everything below is CSS:
-   the depth, the glass, the flowing colour. The app itself is pitch black
-   and plain; this page is the opposite on purpose.
-   ====================================================================== */
-:root{
-  --void:#06070e; --ink:#06070e;
-  --panel:rgba(255,255,255,.045);
-  --panel2:rgba(255,255,255,.08);
-  --edge:rgba(255,255,255,.13);
-  --edge2:rgba(255,255,255,.28);
-  --fg:#eef1fb; --mut:#9aa1ba; --mut2:#656c88;
-
-  --aqua:#39d8ff; --violet:#8b5cff; --rose:#ff5ea8; --mint:#57ffc4; --gold:#ffd579;
-
-  --display:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
-
-  --f-mega:clamp(58px,13.5vw,148px);
-  --f-h2:clamp(29px,4.6vw,50px);
-  --f-h3:clamp(19px,2.2vw,23px);
-  --f-body:clamp(15px,1.5vw,17px);
-  --f-small:13.5px; --f-micro:11.5px;
-  --col:min(1120px,100%); --read:62ch;
-  color-scheme:dark;
+/* KEYFLOW HUD console. Black & white by default; a theme switch flips the
+   whole thing to a gold "terminal" with a wireframe node-sphere + matrix
+   rain. One screen: Get / Open-vault are tabs, not a long scroll. */
+:root{color-scheme:dark}
+body{
+  --bg:#000; --fg:#f6f6f6; --dim:#8c8c8c; --faint:#565656;
+  --line:rgba(255,255,255,.16); --line2:rgba(255,255,255,.34);
+  --acc:#ffffff; --glow:rgba(255,255,255,.5); --panel:rgba(255,255,255,.028);
+  --sphere:#ffffff;
+}
+body[data-theme="gold"]{
+  --bg:#060501; --fg:#f6ecc8; --dim:#b39b5a; --faint:#6e5f32;
+  --line:rgba(244,205,66,.24); --line2:rgba(244,205,66,.52);
+  --acc:#f5cf3e; --glow:rgba(245,207,62,.55); --panel:rgba(244,205,66,.05);
+  --sphere:#f5cf3e;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--void);color:var(--fg);
-  font:400 var(--f-body)/1.65 var(--display);
-  -webkit-font-smoothing:antialiased;letter-spacing:-.011em;
-  overflow-x:hidden;position:relative;min-height:100%;
-}
-h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.04em;text-wrap:balance;line-height:1.03}
-p{margin:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:400 14px/1.6 "IBM Plex Mono",ui-monospace,Menlo,monospace;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .5s,color .5s}
 a{color:inherit}
-img{max-width:100%;height:auto;display:block}
-:focus-visible{outline:2px solid var(--aqua);outline-offset:3px;border-radius:6px}
+h1,h2,h3{margin:0;font-family:"Orbitron",sans-serif;font-weight:700;letter-spacing:.02em}
 
-/* ---------------- the liquid field ---------------- */
-.liquid{position:fixed;inset:0;z-index:-2;overflow:hidden;
-  background:radial-gradient(130% 100% at 50% -20%, #121a3d 0%, #090b1a 46%, #050609 100%)}
-.blob{position:absolute;border-radius:50%;filter:blur(72px);opacity:.5;mix-blend-mode:screen;will-change:transform}
-.b1{width:52vw;height:52vw;left:-10vw;top:-12vw;
-  background:radial-gradient(circle at 35% 35%,var(--violet),transparent 68%);animation:drift1 26s ease-in-out infinite}
-.b2{width:46vw;height:46vw;right:-12vw;top:2vw;
-  background:radial-gradient(circle at 60% 40%,var(--aqua),transparent 66%);animation:drift2 32s ease-in-out infinite}
-.b3{width:44vw;height:44vw;left:6vw;bottom:-16vw;
-  background:radial-gradient(circle at 50% 50%,var(--rose),transparent 66%);animation:drift3 29s ease-in-out infinite}
-.b4{width:40vw;height:40vw;right:4vw;bottom:-10vw;
-  background:radial-gradient(circle at 50% 50%,var(--mint),transparent 68%);animation:drift4 36s ease-in-out infinite}
-@keyframes drift1{50%{transform:translate(12vw,10vh) scale(1.18)}}
-@keyframes drift2{50%{transform:translate(-10vw,14vh) scale(1.12)}}
-@keyframes drift3{50%{transform:translate(14vw,-8vh) scale(1.2)}}
-@keyframes drift4{50%{transform:translate(-12vw,-10vh) scale(1.1)}}
-/* a faint grain so the gradients read as matter, not banding */
-.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+#matrix{position:fixed;inset:0;z-index:-3;pointer-events:none;opacity:.55}
+#sphere{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);
+  width:min(88vw,740px);height:min(88vw,740px);z-index:-2;pointer-events:none}
+.vign{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(62% 52% at 50% 43%,transparent 42%,var(--bg) 93%)}
 
-.wrap{width:var(--col);margin-inline:auto;padding-inline:20px;position:relative}
+.brk{position:relative}
+.brk::before,.brk::after{content:"";position:absolute;width:13px;height:13px;pointer-events:none}
+.brk::before{top:-1px;left:-1px;border-top:2px solid var(--acc);border-left:2px solid var(--acc)}
+.brk::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--acc);border-right:2px solid var(--acc)}
 
-/* reusable glass */
-.glass{background:var(--panel);backdrop-filter:blur(16px) saturate(1.35);-webkit-backdrop-filter:blur(16px) saturate(1.35);
-  border:1px solid var(--edge);border-radius:20px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 30px 70px -36px rgba(0,0,0,.8)}
+.hud{min-height:100vh;display:flex;flex-direction:column;max-width:1180px;margin:0 auto;padding:0 clamp(16px,3vw,34px)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 2px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-family:"Orbitron";font-weight:900;font-size:16px;letter-spacing:.26em}
+.brand .lg{width:24px;height:24px;border:2px solid var(--acc);border-radius:50%;position:relative;box-shadow:0 0 12px var(--glow)}
+.brand .lg::after{content:"";position:absolute;inset:5px;border:1.5px solid var(--acc);border-radius:50%;opacity:.6}
+.status{display:flex;gap:18px;color:var(--dim);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+.status span{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.status span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--glow);animation:blink 2.6s infinite}
+@media(max-width:820px){.status{display:none}}
+.themebtn{display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--fg);
+  font:600 11px/1 "IBM Plex Mono";letter-spacing:.2em;text-transform:uppercase;padding:10px 15px;cursor:pointer;transition:.18s}
+.themebtn:hover{background:var(--acc);color:var(--bg);box-shadow:0 0 20px var(--glow)}
+.themebtn .sw{width:26px;height:14px;border:1px solid currentColor;border-radius:999px;position:relative}
+.themebtn .sw::after{content:"";position:absolute;top:1px;left:1px;width:10px;height:10px;border-radius:50%;background:currentColor;transition:left .2s}
+body[data-theme="gold"] .themebtn .sw::after{left:13px}
 
-/* ---------------- hero ---------------- */
-.hero{padding-block:clamp(40px,7vw,86px) clamp(36px,6vw,66px);text-align:center;position:relative}
-.stage{perspective:1300px;height:clamp(188px,30vw,300px);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
-.orb{position:relative;width:clamp(150px,21vw,208px);height:clamp(150px,21vw,208px);
-  transform-style:preserve-3d;animation:float 7.5s ease-in-out infinite}
-.orb .aura{position:absolute;inset:-34%;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--aqua),var(--violet),var(--rose),var(--gold),var(--mint),var(--aqua));
-  filter:blur(30px);opacity:.8;animation:spin 16s linear infinite}
-.orb .core{position:absolute;inset:4%;
-  border-radius:44% 56% 62% 38%/46% 40% 60% 54%;
-  background:conic-gradient(from 120deg,var(--violet),var(--aqua),var(--mint),var(--rose),var(--violet));
-  filter:saturate(1.4) blur(1px);opacity:.92;
-  animation:morph 10s ease-in-out infinite, spin 26s linear infinite reverse;
-  box-shadow:inset 0 0 40px rgba(255,255,255,.35)}
-.orb .chip{position:absolute;inset:14%;border-radius:30%;
-  background:linear-gradient(150deg,rgba(255,255,255,.3),rgba(255,255,255,.03) 60%);
-  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
-  border:1px solid var(--edge2);display:flex;align-items:center;justify-content:center;
-  transform:translateZ(46px);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.5), inset 0 -18px 30px rgba(0,0,0,.35), 0 26px 50px -18px rgba(0,0,0,.8)}
-.orb .chip::before{content:"";position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(135deg,rgba(255,255,255,.5),transparent 42%);opacity:.6;mix-blend-mode:overlay}
-.orb .chip svg{width:46%;height:46%;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
-.orb .shadow{position:absolute;left:12%;right:12%;bottom:-16%;height:16px;border-radius:50%;
-  background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%);filter:blur(7px);transform:translateZ(-40px)}
-@keyframes float{50%{transform:translateY(-16px) rotateX(7deg) rotateZ(-2deg)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes morph{
-  0%,100%{border-radius:44% 56% 62% 38%/46% 40% 60% 54%}
-  33%{border-radius:60% 40% 38% 62%/52% 58% 42% 48%}
-  66%{border-radius:40% 60% 56% 44%/60% 42% 58% 40%}
-}
-.kick{font-family:var(--mono);font-size:12.5px;font-weight:600;letter-spacing:.26em;
-  color:var(--mut);margin:16px 0 12px;text-transform:uppercase}
-.hero h1{font-size:var(--f-mega);font-weight:900;letter-spacing:-.06em;
-  background:linear-gradient(180deg,#fff 30%,#c7ccff 75%,#8b8fb6);-webkit-background-clip:text;background-clip:text;color:transparent;
-  margin-bottom:18px}
-.lede{font-size:clamp(17px,2.1vw,22px);color:var(--mut);max-width:30ch;margin:0 auto;line-height:1.46;letter-spacing:-.018em}
-.lede b{color:var(--fg);font-weight:600}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vw,28px);padding:clamp(22px,5vh,54px) 0}
+.title{text-align:center}
+.title h1{font-size:clamp(44px,9vw,90px);font-weight:900;letter-spacing:.14em;text-shadow:0 0 30px var(--glow)}
+.title .tag{color:var(--dim);font-size:clamp(11px,1.5vw,13.5px);letter-spacing:.22em;text-transform:uppercase;margin-top:10px}
+.title .tag b{color:var(--fg)}
 
-/* ---------------- liquid CTA ---------------- */
-.getbox{margin-top:36px;display:flex;flex-direction:column;align-items:center;gap:14px}
-.get{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:13px;cursor:pointer;
-  border:0;border-radius:999px;padding:19px 38px;text-decoration:none;
-  font:800 17px/1 var(--display);letter-spacing:-.02em;color:#fff;
-  background:linear-gradient(90deg,var(--aqua),var(--violet),var(--rose),var(--gold),var(--aqua));
-  background-size:300% 100%;animation:flow 9s linear infinite;
-  text-shadow:0 1px 12px rgba(0,0,0,.4);
-  box-shadow:0 16px 46px -14px var(--violet), inset 0 1px 0 rgba(255,255,255,.55);
-  transition:transform .16s cubic-bezier(.22,1,.36,1),box-shadow .2s}
-.get::after{content:"";position:absolute;inset:0;border-radius:inherit;
-  background:linear-gradient(180deg,rgba(255,255,255,.3),transparent 45%);opacity:.7;mix-blend-mode:overlay}
-.get:hover{transform:translateY(-3px) scale(1.015);box-shadow:0 22px 60px -14px var(--violet), inset 0 1px 0 rgba(255,255,255,.6)}
-.get:active{transform:translateY(-1px)}
-.get svg{width:19px;height:19px;flex:0 0 auto;position:relative;z-index:1}
-.get span{position:relative;z-index:1}
-@keyframes flow{to{background-position:300% 0}}
-.getsub{font:400 var(--f-small)/1.5 var(--mono);color:var(--mut2);letter-spacing:-.01em}
-.getsub a{color:var(--mut);text-underline-offset:3px}
-.getsub2 a{color:var(--mut);text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px;transition:color .15s,border-color .15s}
-.getsub2 a:hover{color:var(--fg);border-color:var(--edge2)}
+.console{width:min(620px,100%);background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;background:transparent;border:0;border-right:1px solid var(--line);cursor:pointer;color:var(--dim);
+  font:600 12px/1 "IBM Plex Mono";letter-spacing:.22em;text-transform:uppercase;padding:15px 10px;transition:.16s}
+.tab:last-child{border-right:0}
+.tab:hover{color:var(--fg)}
+.tab.on{background:var(--acc);color:var(--bg)}
+.panel{padding:clamp(20px,3vw,30px)}
+.panel[hidden]{display:none}
 
-/* ---------------- 3D screenshot slab ---------------- */
-.screenband{margin-top:clamp(40px,6vw,74px);perspective:1800px;position:relative}
-.slab{width:var(--col);margin-inline:auto;transform-style:preserve-3d;
-  transform:rotateX(13deg) rotateY(-11deg);transition:transform .6s cubic-bezier(.22,1,.36,1);
-  border:1px solid var(--edge);border-radius:18px;overflow:hidden;background:#0a0c16;
-  box-shadow:0 70px 130px -46px rgba(0,0,0,.92), 0 0 90px -26px var(--violet), inset 0 1px 0 rgba(255,255,255,.12)}
-.slab:hover{transform:rotateX(4deg) rotateY(-3deg) translateY(-4px)}
-.slab .chrome{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--edge);
-  background:rgba(255,255,255,.05)}
-.slab .chrome i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.22);display:block}
-.slab .chrome span{margin-left:9px;font:500 var(--f-micro)/1 var(--mono);color:var(--mut2);letter-spacing:.04em}
+.getwrap{display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+.detected{color:var(--dim);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.detected b{color:var(--acc)}
+.get,.cta{font:700 13px/1 "IBM Plex Mono";letter-spacing:.2em;text-transform:uppercase;color:var(--acc);
+  background:transparent;border:1px solid var(--line2);padding:17px 28px;cursor:pointer;position:relative;
+  display:inline-flex;align-items:center;justify-content:center;gap:11px;transition:.18s;text-decoration:none}
+.get:hover,.cta:hover{background:var(--acc);color:var(--bg);box-shadow:0 0 26px var(--glow)}
+.get svg{width:17px;height:17px}
+.subcta{color:var(--faint);font-size:11px;letter-spacing:.12em}
+.subcta a{color:var(--dim);text-underline-offset:3px}
 
-/* keep the old .shot used inside sections, as flat glass frames with gentle depth */
-.shot{border:1px solid var(--edge);border-radius:16px;overflow:hidden;background:#0a0c16;
-  box-shadow:0 40px 80px -40px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.1)}
+.stats{display:flex;gap:clamp(16px,4vw,44px);flex-wrap:wrap;justify-content:center;color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.stats b{color:var(--acc);font-weight:600;text-shadow:0 0 12px var(--glow)}
+.stats span{display:flex;align-items:center;gap:8px}
+.stats span::before{content:"";width:5px;height:5px;background:var(--acc);box-shadow:0 0 8px var(--glow);transform:rotate(45deg)}
 
-/* ---------------- facts (3D glass) ---------------- */
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-block:clamp(44px,6vw,76px);perspective:1200px}
-.fact{padding:26px 22px;border-radius:18px;background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
-  border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 24px 50px -34px rgba(0,0,0,.8);
-  transform-style:preserve-3d;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s}
-.fact:hover{transform:translateY(-8px) rotateX(8deg);box-shadow:0 40px 70px -34px rgba(0,0,0,.85), 0 0 50px -18px var(--aqua)}
-.fact b{display:block;font:600 clamp(21px,2.6vw,27px)/1.1 var(--mono);letter-spacing:-.03em;margin-bottom:8px;
-  font-variant-numeric:tabular-nums;
-  background:linear-gradient(120deg,var(--aqua),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
-.fact:nth-child(2) b{background:linear-gradient(120deg,var(--violet),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent}
-.fact:nth-child(3) b{background:linear-gradient(120deg,var(--gold),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent}
-.fact span{display:block;font-size:var(--f-small);color:var(--mut);line-height:1.5}
+.foot{border-top:1px solid var(--line);padding:16px 2px;color:var(--faint);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+@keyframes blink{0%,70%,100%{opacity:1}82%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
 
-/* ---------------- sections ---------------- */
-section{padding-block:clamp(46px,6.5vw,88px);position:relative}
-section + section{border-top:1px solid var(--edge)}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font:600 var(--f-micro)/1 var(--mono);
-  letter-spacing:.12em;text-transform:none;color:var(--mut);
-  background:var(--panel);border:1px solid var(--edge);border-radius:999px;padding:7px 13px 7px 11px}
-.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;
-  background:linear-gradient(120deg,var(--aqua),var(--violet));box-shadow:0 0 10px var(--aqua)}
-.sechead{display:flex;flex-direction:column;gap:16px;max-width:var(--read);align-items:flex-start}
-.sechead h2{font-size:var(--f-h2)}
-.sechead p{color:var(--mut);font-size:clamp(16px,1.7vw,18.5px);line-height:1.62}
-.sechead p + p{margin-top:12px}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,56px);align-items:center;margin-top:8px;perspective:1600px}
-.split .shot{transform:rotateY(8deg);transition:transform .6s cubic-bezier(.22,1,.36,1)}
-.split .shot:hover{transform:rotateY(2deg) translateY(-4px)}
-.split:nth-of-type(odd) .shot{transform:rotateY(-8deg)}
-.split:nth-of-type(odd) .shot:hover{transform:rotateY(-2deg) translateY(-4px)}
-
-/* feature list (glass, 3D hover) */
-.feats{list-style:none;margin:34px 0 0;padding:0;display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:14px;perspective:1200px}
-.feats li{padding:24px 22px;border-radius:16px;background:var(--panel);
-  backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
-  border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 20px 44px -32px rgba(0,0,0,.8);
-  transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s}
-.feats li:hover{transform:translateY(-7px) rotateX(7deg);box-shadow:0 36px 64px -32px rgba(0,0,0,.85), 0 0 46px -20px var(--violet)}
-.feats h3{font-size:var(--f-h3);margin-bottom:9px;letter-spacing:-.028em}
-.feats p{color:var(--mut);font-size:var(--f-small);line-height:1.6}
-.feats code,.plain code{font:500 12.5px/1 var(--mono);background:rgba(255,255,255,.08);
-  border:1px solid var(--edge);border-radius:6px;padding:2px 6px;color:var(--fg)}
-
-/* plain-dealing */
-.plain{margin-top:34px;padding:clamp(24px,3.4vw,38px);border-radius:18px;background:var(--panel);
-  backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
-  border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 30px 60px -36px rgba(0,0,0,.8)}
-.plain dl{margin:0;display:grid;gap:24px}
-.plain dt{font:600 15px/1.4 var(--display);letter-spacing:-.02em;margin-bottom:6px}
-.plain dd{margin:0;color:var(--mut);font-size:var(--f-small);line-height:1.62;max-width:var(--read)}
-
-/* pick your machine */
-.plats{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:12px}
-.plat{border-radius:14px;background:var(--panel);backdrop-filter:blur(12px) saturate(1.25);-webkit-backdrop-filter:blur(12px) saturate(1.25);
-  border:1px solid var(--edge);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 21px;flex-wrap:wrap;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);transition:transform .3s,border-color .3s}
-.plat:hover{transform:translateY(-3px);border-color:var(--edge2)}
-.plat b{font-size:15.5px;font-weight:600;letter-spacing:-.02em}
-.plat span{display:block;color:var(--mut2);font:400 var(--f-small)/1.45 var(--mono)}
-.plat a{font:700 13.5px/1 var(--display);text-decoration:none;color:#06070e;white-space:nowrap;flex:0 0 auto;
-  padding:11px 20px;border-radius:999px;
-  background:linear-gradient(90deg,var(--aqua),var(--mint));background-size:200% 100%;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);transition:background-position .4s,transform .15s}
-.plat a:hover{background-position:100% 0;transform:translateY(-1px)}
-.plat a.ghost{background:transparent;color:var(--fg);border:1px solid var(--edge2);box-shadow:none}
-
-footer{margin-top:clamp(40px,6vw,70px);border-top:1px solid var(--edge);padding-block:38px 56px;color:var(--mut2);
-  font:400 var(--f-small)/1.7 var(--mono)}
-footer a{color:var(--mut);text-underline-offset:3px}
-.foot-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
-
-/* ---------------- open your vault (built in) ---------------- */
-.opener{margin-top:30px;max-width:720px}
-.kfgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-@media(max-width:560px){.kfgrid{grid-template-columns:repeat(2,1fr)}}
+/* ---- vault opener (kf*) : HUD terminal style ---- */
+.kfgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:520px){.kfgrid{grid-template-columns:repeat(3,1fr)}}
 .kfw{position:relative}
-.kfw .kfn{position:absolute;top:0;bottom:0;left:13px;display:flex;align-items:center;color:var(--mut2);font:600 11px/1 var(--mono);pointer-events:none}
-.kfw input{width:100%;padding:14px 11px 14px 31px;background:rgba(255,255,255,.04);border:1px solid var(--edge);border-radius:12px;color:var(--fg);font:500 14.5px/1 var(--mono);outline:none;transition:border-color .15s,box-shadow .15s}
-.kfw input:focus{border-color:var(--aqua);box-shadow:0 0 0 3px rgba(57,216,255,.18)}
-.kfrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.kfbtn{padding:15px 30px;font-size:15px;border:0}
-.kfghost{font:600 14px/1 var(--display);color:var(--fg);background:rgba(255,255,255,.05);border:1px solid var(--edge2);border-radius:999px;padding:13px 22px;cursor:pointer;transition:background .15s,transform .15s}
-.kfghost:hover{background:rgba(255,255,255,.1);transform:translateY(-1px)}
-.kfnote{font:400 var(--f-small)/1.4 var(--mono);color:var(--mut2)}
-.kferr{color:#ff7a8f;min-height:20px;margin-top:13px;font:400 var(--f-small)/1.5 var(--mono)}
-.kfvault{margin-top:28px;max-width:760px}
-.kftool{display:flex;gap:12px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
-.kfsrch{flex:1;min-width:180px;position:relative}
-.kfsrch input{width:100%;padding:13px 14px 13px 40px;background:rgba(255,255,255,.04);border:1px solid var(--edge);border-radius:12px;color:var(--fg);font:400 15px/1 var(--display);outline:none}
-.kfsrch input:focus{border-color:var(--edge2)}
-.kfsrch svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--mut2)}
-.kfmeta{display:flex;align-items:center;gap:9px;color:var(--mut);font:400 var(--f-small)/1 var(--mono);margin:0 2px 16px}
-.kfdot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint)}
-.kflist{display:grid;gap:10px}
-.kfe{background:var(--panel);backdrop-filter:blur(12px) saturate(1.25);-webkit-backdrop-filter:blur(12px) saturate(1.25);
-  border:1px solid var(--edge);border-radius:14px;display:flex;align-items:center;gap:14px;padding:14px 17px;cursor:pointer;
-  transition:transform .25s,border-color .25s,box-shadow .25s;width:100%;text-align:left;color:inherit;font:inherit;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-.kfe:hover{transform:translateY(-3px);border-color:var(--edge2);box-shadow:0 20px 40px -28px rgba(0,0,0,.8),0 0 36px -22px var(--aqua)}
-.kfav{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font:800 15px/1 var(--display);color:#06070e;flex:0 0 auto;
-  background:linear-gradient(135deg,var(--aqua),var(--violet));box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.kfw .kfn{position:absolute;top:0;bottom:0;left:9px;display:flex;align-items:center;color:var(--faint);font-size:10px;pointer-events:none}
+.kfw input{width:100%;padding:12px 8px 12px 24px;background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--fg);
+  font:500 13px/1 "IBM Plex Mono";outline:none;transition:border-color .15s,box-shadow .15s}
+body[data-theme="gold"] .kfw input{background:rgba(244,205,66,.03)}
+.kfw input:focus{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 14px var(--glow)}
+.kfrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.kfbtn{padding:15px 26px}
+.kfghost{font:600 12px/1 "IBM Plex Mono";letter-spacing:.16em;text-transform:uppercase;color:var(--fg);
+  background:transparent;border:1px solid var(--line2);padding:13px 20px;cursor:pointer;transition:.16s}
+.kfghost:hover{background:var(--acc);color:var(--bg)}
+.kfnote{font-size:10.5px;color:var(--faint);letter-spacing:.08em}
+.kferr{color:#ff6b6b;min-height:18px;margin-top:12px;font-size:12px;text-align:center}
+body[data-theme="gold"] .kferr{color:#ff8a5c}
+.kfvault{margin-top:4px}
+.kftool{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.kfsrch{flex:1;min-width:150px;position:relative}
+.kfsrch input{width:100%;padding:12px 12px 12px 36px;background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--fg);
+  font:400 13px/1 "IBM Plex Mono";outline:none}
+body[data-theme="gold"] .kfsrch input{background:rgba(244,205,66,.03)}
+.kfsrch input:focus{border-color:var(--line2)}
+.kfsrch svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--faint)}
+.kfmeta{display:flex;align-items:center;gap:9px;color:var(--dim);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0 2px 14px}
+.kfdot{width:7px;height:7px;background:var(--acc);box-shadow:0 0 8px var(--glow);transform:rotate(45deg)}
+.kflist{display:grid;gap:8px;max-height:42vh;overflow:auto}
+.kfe{background:rgba(255,255,255,.015);border:1px solid var(--line);display:flex;align-items:center;gap:13px;padding:13px 15px;cursor:pointer;
+  transition:.16s;width:100%;text-align:left;color:inherit;font:inherit}
+body[data-theme="gold"] .kfe{background:rgba(244,205,66,.025)}
+.kfe:hover{border-color:var(--line2);box-shadow:0 0 18px -6px var(--glow)}
+.kfav{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font:700 14px/1 "Orbitron";color:var(--bg);flex:0 0 auto;
+  background:var(--acc);box-shadow:0 0 12px var(--glow)}
 .kfet{min-width:0;flex:1}
-.kfet b{display:block;font-weight:600;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kfet span{display:block;color:var(--mut2);font:400 var(--f-small)/1.4 var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kfchev{color:var(--mut2);flex:0 0 auto;display:flex}
-.kfempty{color:var(--mut);text-align:center;padding:34px 20px;font-size:var(--f-small);
-  border:1px dashed var(--edge);border-radius:14px}
+.kfet b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kfet span{display:block;color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kfchev{color:var(--faint);flex:0 0 auto;display:flex}
+.kfempty{color:var(--dim);text-align:center;padding:26px 16px;font-size:12px;border:1px dashed var(--line)}
 
-/* shared overlay look for both modals */
-.kfov,.dlov{position:fixed;inset:0;background:rgba(4,5,10,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+/* ---- shared overlays (kf + dl) ---- */
+.kfov,.dlov{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
   display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+body[data-theme="gold"] .kfov,body[data-theme="gold"] .dlov{background:rgba(6,5,1,.86)}
 .kfov.show,.dlov.show{display:flex}
-.kfsheet,.dlsheet{width:100%;max-width:520px;background:linear-gradient(180deg,rgba(26,30,54,.92),rgba(12,14,26,.92));
-  backdrop-filter:blur(26px) saturate(1.4);-webkit-backdrop-filter:blur(26px) saturate(1.4);
-  border:1px solid var(--edge2);border-radius:22px;padding:28px;max-height:90vh;overflow:auto;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 50px 100px -40px rgba(0,0,0,.95)}
-.kfsheet h3{font-size:24px;letter-spacing:-.03em;margin-bottom:4px}
-.kfty{color:var(--mut2);font:600 var(--f-micro)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
-.kffld{border:1px solid var(--edge);border-radius:13px;padding:12px 14px;margin-bottom:10px;background:rgba(255,255,255,.03)}
-.kffld .kfk{color:var(--mut2);font:600 var(--f-micro)/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.kfsheet,.dlsheet{width:100%;max-width:500px;background:var(--bg);border:1px solid var(--line2);padding:26px;max-height:90vh;overflow:auto;
+  box-shadow:0 0 50px -10px var(--glow);position:relative}
+.kfsheet h3,.dlview h3{font-family:"Orbitron";font-size:20px;letter-spacing:.06em;margin-bottom:4px}
+.kfty{color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:18px}
+.kffld{border:1px solid var(--line);padding:12px 14px;margin-bottom:9px;background:rgba(255,255,255,.015)}
+body[data-theme="gold"] .kffld{background:rgba(244,205,66,.025)}
+.kffld .kfk{color:var(--dim);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
 .kfvrow{display:flex;align-items:center;gap:10px}
-.kfv{flex:1;min-width:0;word-break:break-all;font-size:15px}
-.kfv.mono{font-family:var(--mono);font-size:14px;letter-spacing:.3px}
-.kfic{background:rgba(255,255,255,.05);border:1px solid var(--edge2);color:var(--fg);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;transition:background .15s}
-.kfic:hover{background:rgba(255,255,255,.12)}
-.kfic svg{width:16px;height:16px}
-.kfinp{width:100%;padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--edge);border-radius:12px;color:var(--fg);font-size:15px;outline:none;margin-bottom:10px;font-family:var(--display)}
-.kfinp:focus{border-color:var(--aqua)}
-.kflbl{display:block;color:var(--mut2);font:600 var(--f-micro)/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;margin:2px 2px 6px}
-.kffoot{display:flex;gap:11px;margin-top:12px}
+.kfv{flex:1;min-width:0;word-break:break-all;font-size:14px}
+.kfv.mono{font-family:"IBM Plex Mono";letter-spacing:.4px}
+.kfic{background:transparent;border:1px solid var(--line2);color:var(--fg);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;transition:.15s}
+.kfic:hover{background:var(--acc);color:var(--bg)}
+.kfic svg{width:15px;height:15px}
+.kfinp{width:100%;padding:12px 13px;background:rgba(255,255,255,.015);border:1px solid var(--line);color:var(--fg);font:400 14px/1 "IBM Plex Mono";outline:none;margin-bottom:9px}
+body[data-theme="gold"] .kfinp{background:rgba(244,205,66,.025)}
+.kfinp:focus{border-color:var(--acc)}
+.kflbl{display:block;color:var(--dim);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin:2px 2px 6px}
+.kffoot{display:flex;gap:10px;margin-top:12px}
 .kffoot>*{flex:1;justify-content:center;text-align:center}
-.kftoast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:linear-gradient(180deg,rgba(30,34,60,.95),rgba(14,16,30,.95));
-  border:1px solid var(--edge2);color:var(--fg);padding:12px 20px;border-radius:12px;font:500 14px/1 var(--display);z-index:70;opacity:0;transition:opacity .2s;pointer-events:none;
-  box-shadow:0 20px 50px -20px rgba(0,0,0,.9)}
+.kftoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--bg);border:1px solid var(--acc);color:var(--fg);
+  padding:12px 20px;font:600 12px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 0 24px -6px var(--glow)}
 .kftoast.show{opacity:1}
 
-/* ---------------- guided download flow ---------------- */
-.dlview h3{font-size:26px;letter-spacing:-.035em;margin:10px 0 6px}
-.dlsub{color:var(--mut);font-size:var(--f-small);line-height:1.6;margin-bottom:20px}
-.dlchips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
-.dlchip{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--edge);border-radius:14px;padding:15px 16px;cursor:pointer;color:var(--fg);font:inherit;transition:border-color .15s,background .15s,transform .15s}
-.dlchip:hover{border-color:var(--edge2);transform:translateY(-2px)}
-.dlchip.sel{border-color:transparent;background:linear-gradient(135deg,rgba(57,216,255,.22),rgba(139,92,255,.22));box-shadow:0 0 0 1px var(--aqua), 0 0 30px -10px var(--aqua)}
-.dlchip b{font-weight:600;font-size:15px;letter-spacing:-.02em}
-.dlchip span{color:var(--mut2);font:400 var(--f-micro)/1.3 var(--mono)}
-.dlbtn{border:0;width:100%;justify-content:center}
-.dlmethods{display:grid;gap:12px;margin-bottom:16px}
-.dlm{position:relative;text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--edge);border-radius:15px;padding:19px 18px;cursor:pointer;color:var(--fg);font:inherit;transition:border-color .15s,background .15s,transform .15s}
-.dlm:hover{border-color:var(--edge2);background:rgba(255,255,255,.06);transform:translateY(-2px)}
-.dlm b{display:block;font-weight:700;font-size:17px;letter-spacing:-.025em;margin-bottom:5px}
-.dlm em{position:absolute;top:16px;right:16px;font-style:normal;font:700 var(--f-micro)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#06070e;padding:5px 10px;border-radius:999px;background:linear-gradient(90deg,var(--mint),var(--aqua))}
-.dlm span{color:var(--mut);font-size:var(--f-small);line-height:1.55;display:block}
-.dllink{background:transparent;border:0;color:var(--mut);font:600 var(--f-small)/1 var(--display);cursor:pointer;padding:8px 2px;margin-top:2px}
+/* ---- download flow (dl*) ---- */
+.dlview .eyebrow,.dlsub{display:block}
+.dlsub{color:var(--dim);font-size:12px;letter-spacing:.06em;margin:4px 0 20px}
+.dlchips{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:20px}
+.dlchip{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;background:rgba(255,255,255,.015);border:1px solid var(--line);
+  padding:14px 15px;cursor:pointer;color:var(--fg);font:inherit;transition:.15s}
+body[data-theme="gold"] .dlchip{background:rgba(244,205,66,.025)}
+.dlchip:hover{border-color:var(--line2)}
+.dlchip.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc),0 0 20px -6px var(--glow)}
+.dlchip b{font-weight:600;font-size:14px}
+.dlchip span{color:var(--dim);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+.dlbtn{width:100%;justify-content:center}
+.dlmethods{display:grid;gap:11px;margin-bottom:14px}
+.dlm{position:relative;text-align:left;background:rgba(255,255,255,.015);border:1px solid var(--line);padding:18px;cursor:pointer;color:var(--fg);font:inherit;transition:.15s}
+body[data-theme="gold"] .dlm{background:rgba(244,205,66,.025)}
+.dlm:hover{border-color:var(--line2)}
+.dlm b{display:block;font-family:"Orbitron";font-weight:700;font-size:15px;letter-spacing:.04em;margin-bottom:6px}
+.dlm em{position:absolute;top:15px;right:15px;font-style:normal;font:700 9px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;color:var(--bg);padding:5px 9px;background:var(--acc)}
+.dlm span{color:var(--dim);font-size:12px;line-height:1.5;display:block}
+.dllink{background:transparent;border:0;color:var(--dim);font:600 11px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;cursor:pointer;padding:8px 2px;margin-top:2px}
 .dllink:hover{color:var(--fg)}
-.dlsteps{list-style:none;margin:18px 0 8px;padding:0;display:grid;gap:22px}
-.dlsteps>li{display:flex;gap:14px}
-.dlsteps>li>b{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 13px/1 var(--mono);color:#06070e;
-  background:linear-gradient(135deg,var(--aqua),var(--violet));box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.dlsteps{list-style:none;margin:18px 0 8px;padding:0;display:grid;gap:20px}
+.dlsteps>li{display:flex;gap:13px}
+.dlsteps>li>b{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font:700 12px/1 "Orbitron";color:var(--bg);background:var(--acc);box-shadow:0 0 12px var(--glow)}
 .dlsteps>li>div{flex:1;min-width:0}
-.dlsteps p{color:var(--mut);font-size:var(--f-small);line-height:1.6;margin-bottom:10px}
-.dlcode{display:flex;align-items:stretch;background:rgba(0,0,0,.45);border:1px solid var(--edge2);border-radius:12px;overflow:hidden}
-.dlcode code{flex:1;min-width:0;padding:14px 15px;font:500 12.5px/1.6 var(--mono);color:#dfe6ff;white-space:pre-wrap;word-break:break-all;overflow:auto}
-.dlcopy{flex:0 0 auto;border:0;border-left:1px solid var(--edge2);background:rgba(255,255,255,.06);color:var(--fg);font:600 12.5px/1 var(--display);padding:0 17px;cursor:pointer;transition:background .15s}
-.dlcopy:hover{background:rgba(255,255,255,.14)}
-.dlcopy.done{color:var(--mint)}
-.dlhint{color:var(--mut2);font:400 var(--f-micro)/1.55 var(--mono);margin-top:10px}
-.dlbar{height:12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--edge);overflow:hidden;margin:20px 0 11px;position:relative}
-.dlbar i{display:block;height:100%;width:0;border-radius:999px;transition:width .2s ease;
-  background:linear-gradient(90deg,var(--aqua),var(--violet),var(--rose),var(--aqua));background-size:300% 100%;animation:flow 4s linear infinite}
-.dlpct{font:600 14px/1 var(--mono);color:var(--fg);font-variant-numeric:tabular-nums}
-
-/* ---------------- responsive ---------------- */
-@media (max-width:860px){
-  .split{grid-template-columns:1fr}
-  .facts{grid-template-columns:1fr}
-  .slab{transform:none}
-  .split .shot,.split:nth-of-type(odd) .shot{transform:none}
-  .blob{filter:blur(54px);opacity:.42}
-}
-@media (max-width:560px){
-  .get{width:100%;justify-content:center}
-}
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-  .slab,.split .shot,.split:nth-of-type(odd) .shot{transform:none!important}
-  .orb{transform:none!important}
-}
-
-/* CSS-drawn product mockups — no raster screenshots, on-brand with the page */
-.winbody{padding:20px;display:grid;gap:11px}
-.winsearch{height:40px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--edge);display:flex;align-items:center;gap:10px;padding:0 15px;color:var(--mut2);font:400 13.5px/1 var(--display)}
-.winsearch svg{width:15px;height:15px}
-.winrow{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--edge)}
-.winav{width:38px;height:38px;border-radius:11px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
-.winmeta{flex:1;min-width:0;display:grid;gap:8px}
-.winmeta i{display:block;height:10px;border-radius:4px}
-.winmeta .l1{width:38%;background:rgba(255,255,255,.55)}
-.winmeta .l2{width:60%;height:8px;background:rgba(255,255,255,.2)}
-.winpill{width:34px;height:20px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--edge);flex:0 0 auto;position:relative}
-.winpill::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.4)}
-.mock{padding:20px;display:grid;gap:11px}
-.mockrow{display:flex;align-items:center;gap:13px;padding:14px 16px;border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--edge)}
-.mockrow .sd{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
-.mockrow .mt{flex:1;min-width:0;display:grid;gap:7px}
-.mockrow .mt i{display:block;height:10px;border-radius:4px}
-.mockrow .mt .a{width:44%;background:rgba(255,255,255,.55)}
-.mockrow .mt .b{width:66%;height:8px;background:rgba(255,255,255,.2)}
-.mockrow .tag2{font:600 10px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--edge);color:var(--mut);flex:0 0 auto}
-.icons{display:flex;gap:12px;flex-wrap:wrap;padding:22px 22px 8px}
-.icons .ic{width:54px;height:54px;border-radius:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
-.sizewrap{padding:10px 22px 24px}
-.sizebar{height:10px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--edge);position:relative}
-.sizebar span{position:absolute;left:0;top:-1px;bottom:-1px;width:46%;border-radius:999px;background:linear-gradient(90deg,var(--aqua),var(--violet))}
-.sizebar b{position:absolute;left:44%;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;transform:translateY(-50%);box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.dlsteps p{color:var(--dim);font-size:12px;line-height:1.55;margin-bottom:10px}
+.dlcode{display:flex;align-items:stretch;background:rgba(0,0,0,.5);border:1px solid var(--line2)}
+body[data-theme="gold"] .dlcode{background:rgba(0,0,0,.4)}
+.dlcode code{flex:1;min-width:0;padding:13px 14px;font:500 12px/1.6 "IBM Plex Mono";color:var(--acc);white-space:pre-wrap;word-break:break-all;overflow:auto}
+.dlcopy{flex:0 0 auto;border:0;border-left:1px solid var(--line2);background:transparent;color:var(--fg);font:600 11px/1 "IBM Plex Mono";letter-spacing:.1em;text-transform:uppercase;padding:0 15px;cursor:pointer;transition:.15s}
+.dlcopy:hover{background:var(--acc);color:var(--bg)}
+.dlcopy.done{color:var(--acc)}
+.dlhint{color:var(--faint);font-size:10.5px;line-height:1.55;margin-top:10px;letter-spacing:.04em}
+.dlbar{height:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);overflow:hidden;margin:20px 0 11px;position:relative}
+body[data-theme="gold"] .dlbar{background:rgba(244,205,66,.08)}
+.dlbar i{display:block;height:100%;width:0;background:var(--acc);box-shadow:0 0 14px var(--glow);transition:width .2s ease}
+.dlpct{font:600 13px/1 "IBM Plex Mono";color:var(--acc);letter-spacing:.06em}
+/* eyebrow used inside dl modal */
+.eyebrow{display:inline-block;color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
 </style>
 </head>
-<body>
+<body data-theme="mono">
+<canvas id="matrix"></canvas>
+<canvas id="sphere"></canvas>
+<div class="vign"></div>
 
-<div class="liquid" aria-hidden="true">
-  <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span>
-</div>
-<div class="grain" aria-hidden="true"></div>
-
-<div class="wrap">
-
-  <header class="hero">
-    <div class="stage" aria-hidden="true">
-      <div class="orb">
-        <span class="aura"></span>
-        <span class="core"></span>
-        <div class="chip">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10.5" width="15" height="10" rx="2.6" fill="#fff"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg>
-        </div>
-        <span class="shadow"></span>
-      </div>
-    </div>
-    <p class="kick">Password vault</p>
-    <h1>Keyflow</h1>
-    <p class="lede">Your passwords as <b>one encrypted file you own</b>, not an account you rent.</p>
-
-    <div class="getbox">
-      <a class="get" id="get" href="https://github.com/OWNER/REPO/releases/latest">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span id="getlabel">Download for macOS</span>
-      </a>
-      <p class="getsub" id="getsub">Apple Silicon &middot; macOS 10.15 or later &middot; free</p>
-      <p class="getsub2"><a href="#open">Already have a vault? Open it in your browser</a></p>
-    </div>
+<div class="hud">
+  <header class="bar">
+    <div class="brand"><span class="lg"></span>KEYFLOW</div>
+    <div class="status"><span>SECURE</span><span>OFFLINE-FIRST</span><span>ZERO-KNOWLEDGE</span></div>
+    <button class="themebtn" id="themeBtn"><span class="sw"></span><b id="themeName">MONO</b></button>
   </header>
 
-  <div class="screenband">
-    <div class="slab">
-      <div class="chrome"><i></i><i></i><i></i><span>Keyflow</span></div>
-      <div class="winbody">
-        <div class="winsearch"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.4" stroke="currentColor" stroke-width="2"/><path d="m15.8 15.8 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Search</div>
-        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#ff5ea8,#8b5cff)"></span><div class="winmeta"><i class="l1"></i><i class="l2"></i></div><span class="winpill"></span></div>
-        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#39d8ff,#57ffc4)"></span><div class="winmeta"><i class="l1" style="width:30%"></i><i class="l2" style="width:52%"></i></div><span class="winpill"></span></div>
-        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#ffd579,#ff5ea8)"></span><div class="winmeta"><i class="l1" style="width:44%"></i><i class="l2" style="width:66%"></i></div><span class="winpill"></span></div>
-        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#8b5cff,#39d8ff)"></span><div class="winmeta"><i class="l1" style="width:34%"></i><i class="l2" style="width:58%"></i></div><span class="winpill"></span></div>
-        <div class="winrow"><span class="winav" style="background:linear-gradient(135deg,#57ffc4,#39d8ff)"></span><div class="winmeta"><i class="l1" style="width:40%"></i><i class="l2" style="width:48%"></i></div><span class="winpill"></span></div>
+  <main class="stage">
+    <div class="title">
+      <h1>KEYFLOW</h1>
+      <p class="tag">Your passwords as <b>one encrypted file you own</b></p>
+    </div>
+
+    <div class="console brk">
+      <div class="tabs">
+        <button class="tab on" data-tab="get">// Get Keyflow</button>
+        <button class="tab" data-tab="vault">// Open Vault</button>
       </div>
-    </div>
-  </div>
 
-  <div class="facts">
-    <div class="fact"><b>AES-256-GCM</b><span>The same cipher the file would be protected with if a bank wrote it. Tampering is detected, not silently accepted.</span></div>
-    <div class="fact"><b>600,000</b><span>PBKDF2 rounds between your master password and the key. Every guess an attacker makes costs them that much work.</span></div>
-    <div class="fact"><b>1 host</b><span>The app is allowed to reach exactly one address on the internet, and only if you switch sync on. With it off, nothing leaves.</span></div>
-  </div>
-
-  <section>
-    <div class="sechead">
-      <p class="eyebrow">Where your data lives</p>
-      <h2>Three places. You can name all of them.</h2>
-      <p>Most password managers answer this question with a brand name. Keyflow answers it with a file path, a folder, and a row you can check.</p>
-    </div>
-    <ul class="feats">
-      <li><h3>The file</h3><p>One <code>.vault</code> file, encrypted, wherever you put it. Put it in iCloud Drive and your Mac and your phone both have it. No step two.</p></li>
-      <li><h3>This computer</h3><p>An encrypted duplicate so the app opens without hunting for the file. Switchable off. Your PIN and fingerprint live only here and are never written into the file.</p></li>
-      <li><h3>A server, if you want one</h3><p>Off by default. Switched on, an encrypted blob goes up so a dead laptop is recoverable from the master password alone. The server holds ciphertext and cannot read it.</p></li>
-    </ul>
-  </section>
-
-  <section>
-    <div class="split">
-      <div class="sechead">
-        <p class="eyebrow">Checked, not claimed</p>
-        <h2>It tests each place and tells you.</h2>
-        <p>A tick means the app wrote a test file into that folder and deleted it, and found the provider&rsquo;s sync process running. Not that a setting is switched on.</p>
-        <p>No operating system will tell an app whether a cloud upload has actually finished. The panel says that out loud rather than showing you a hopeful tick.</p>
-      </div>
-      <div class="shot"><div class="mock">
-          <div class="mockrow"><span class="sd" style="background:#57ffc4;box-shadow:0 0 10px #57ffc4"></span><div class="mt"><i class="a"></i><i class="b" style="width:52%"></i></div><span class="tag2">Synced</span></div>
-          <div class="mockrow"><span class="sd" style="background:#57ffc4;box-shadow:0 0 10px #57ffc4"></span><div class="mt"><i class="a" style="width:38%"></i><i class="b" style="width:60%"></i></div><span class="tag2">Synced</span></div>
-          <div class="mockrow"><span class="sd" style="background:#ffd579;box-shadow:0 0 10px #ffd579"></span><div class="mt"><i class="a" style="width:42%"></i><i class="b" style="width:70%"></i></div><span class="tag2">Not running</span></div>
-          <div class="mockrow"><span class="sd" style="background:#4a4f66"></span><div class="mt"><i class="a" style="width:34%"></i><i class="b" style="width:50%"></i></div><span class="tag2">Not set up</span></div>
-        </div></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="split">
-      <div class="shot"><div>
-        <div class="icons">
-          <span class="ic" style="background:linear-gradient(135deg,#8b5cff,#39d8ff)"></span>
-          <span class="ic" style="background:linear-gradient(135deg,#39d8ff,#57ffc4)"></span>
-          <span class="ic" style="background:linear-gradient(135deg,#ffd579,#ff5ea8)"></span>
-          <span class="ic" style="background:linear-gradient(135deg,#ff5ea8,#8b5cff)"></span>
-          <span class="ic" style="background:#0a0c16;border:1px solid var(--edge2)"></span>
-          <span class="ic" style="background:#eef1fb"></span>
+      <div class="panel" data-panel="get">
+        <div class="getwrap">
+          <p class="detected">Detected node &middot; <b id="detOS">macOS</b></p>
+          <a class="get" id="get" href="https://github.com/Semtexhigh/keyflow/releases/latest">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Initialize download
+          </a>
+          <p class="subcta">One-paste install that clears the macOS security flag, or a direct file &mdash; choose in the next step. Free &middot; no account.</p>
         </div>
-        <div class="sizewrap"><div class="sizebar"><span></span><b></b></div></div>
-      </div></div>
-      <div class="sechead">
-        <p class="eyebrow">How it looks</p>
-        <h2>Black and white. Nothing to tune.</h2>
-        <p>One look: white on pitch black, the same object as the app itself. No themes and no accent colours &mdash; nothing to pick but the text size, if you want the type larger.</p>
-        <p>The one thing you choose is the app icon: five marks &mdash; a cube (the default), the Keyflow key, a trading chart, a trend line, a red smiley &mdash; or a picture of your own, on a dark or light tile. It changes the lock screen and the browser tab on the spot, and one saved file carries it into the next build so the icon in your dock matches.</p>
-        <p>Unlocking with a PIN takes about sixty milliseconds. Switching tabs is immediate. Those are measured numbers, not impressions.</p>
       </div>
-    </div>
-  </section>
 
-  <section>
-    <div class="sechead">
-      <p class="eyebrow">Before you download it</p>
-      <h2>The things that will annoy you.</h2>
-      <p>Better you read them here than find them out later.</p>
-    </div>
-    <div class="plain">
-      <dl>
-        <div><dt>There is no password recovery</dt><dd>Not a policy. There is no mechanism: nobody holds a copy of your key, so nobody can reset it. Write the master password down somewhere physical before you put anything important in.</dd></div>
-        <div><dt>macOS will warn you once</dt><dd>The app is not code-signed, because that costs a yearly fee to Apple. The one-paste command-line install clears that flag for you so you never see the prompt. If you download the app by hand instead: on an Intel Mac, right-click the app and choose Open, then Open again &mdash; once only. On Apple Silicon macOS may say the app is &ldquo;damaged&rdquo;: that is the same unsigned warning, not a real problem &mdash; run <code>xattr -dr com.apple.quarantine /Applications/Keyflow.app</code> once and open it normally. Windows SmartScreen: More info, then Run anyway.</dd></div>
-        <div><dt>Touch ID does not work on Linux</dt><dd>The system web view on Linux ships no passkey support at all. On macOS and Windows the blocker that prevented it is gone, but that has not yet been confirmed on real hardware. The app says which case you are in rather than offering a button that fails.</dd></div>
-        <div><dt>Anyone who can read this computer can get the PIN</dt><dd>The PIN is a convenience on a machine you trust. It opens the vault instantly and dies after ten wrong tries, and it never leaves the device, so a stolen file or server dump has no PIN in it to attack. Your master password is the actual lock.</dd></div>
-      </dl>
-    </div>
-  </section>
-
-  <section id="open">
-    <div class="sechead">
-      <p class="eyebrow">Already set up</p>
-      <h2>Open your vault.</h2>
-      <p>Have a recovery phrase already? Enter your 12 words to read and manage your passwords here in the browser, on any device &mdash; no install. The phrase never leaves this page: it unlocks the vault locally, and the server only ever holds an encrypted blob it cannot read.</p>
-    </div>
-
-    <div id="kfEnter" class="opener">
-      <div class="kfgrid" id="kfGrid"></div>
-      <div class="kfrow">
-        <button class="get kfbtn" id="kfGo"><span>Open vault</span></button>
-        <button class="kfghost" id="kfClear">Clear</button>
-        <span class="kfnote">Not case-sensitive. Paste all 12 words into any box at once.</span>
-      </div>
-      <div class="kferr" id="kfErr"></div>
-    </div>
-
-    <div id="kfVault" class="kfvault" hidden>
-      <div class="kftool">
-        <div class="kfsrch">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.4" stroke="currentColor" stroke-width="2"/><path d="m15.8 15.8 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input id="kfQ" placeholder="Search" autocomplete="off">
+      <div class="panel" data-panel="vault" hidden>
+        <div id="kfEnter">
+          <div class="kfgrid" id="kfGrid"></div>
+          <div class="kfrow">
+            <button class="get kfbtn" id="kfGo">Decrypt vault</button>
+            <button class="kfghost" id="kfClear">Clear</button>
+          </div>
+          <p class="kfnote" style="text-align:center;margin-top:12px">Enter your 12-word recovery phrase. Not case-sensitive &middot; paste all 12 at once. The phrase never leaves this page.</p>
+          <div class="kferr" id="kfErr"></div>
         </div>
-        <button class="kfghost" id="kfAdd">Add</button>
-        <button class="kfghost" id="kfLock">Lock</button>
+        <div id="kfVault" class="kfvault" hidden>
+          <div class="kftool">
+            <div class="kfsrch">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.4" stroke="currentColor" stroke-width="2"/><path d="m15.8 15.8 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input id="kfQ" placeholder="Search" autocomplete="off">
+            </div>
+            <button class="kfghost" id="kfAdd">Add</button>
+            <button class="kfghost" id="kfLock">Lock</button>
+          </div>
+          <div class="kfmeta"><span class="kfdot"></span><b id="kfCnt">0</b><span id="kfWhen"></span></div>
+          <div class="kflist" id="kfList"></div>
+        </div>
       </div>
-      <div class="kfmeta"><span class="kfdot"></span><b id="kfCnt">0</b><span id="kfWhen"></span></div>
-      <div class="kflist" id="kfList"></div>
     </div>
-  </section>
 
-  <section>
-    <div class="sechead">
-      <p class="eyebrow">Every build</p>
-      <h2>Pick your machine.</h2>
+    <div class="stats">
+      <span><b>AES-256-GCM</b> cipher</span>
+      <span><b>600,000</b> PBKDF2 rounds</span>
+      <span><b>1</b> network host</span>
     </div>
-    <ul class="plats" id="plats">
-      <li class="plat"><div><b>macOS &middot; Apple Silicon</b><span>M1 and later &middot; .dmg</span></div><a data-rx="aarch64.*\.dmg$|_aarch64\.dmg$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
-      <li class="plat"><div><b>macOS &middot; Intel</b><span>2020 and earlier &middot; .dmg</span></div><a data-rx="x64.*\.dmg$|x86_64.*\.dmg$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
-      <li class="plat"><div><b>Windows</b><span>Windows 10 and 11 &middot; .msi</span></div><a data-rx="\.msi$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
-      <li class="plat"><div><b>Linux</b><span>.AppImage, runs as-is</span></div><a data-rx="\.AppImage$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
-      <li class="plat"><div><b>Linux &middot; Debian, Ubuntu</b><span>.deb</span></div><a data-rx="\.deb$" href="https://github.com/OWNER/REPO/releases/latest">Download</a></li>
-      <li class="plat"><div><b>No install at all</b><span>the single HTML file, open it in any browser</span></div><a class="ghost" data-rx="\.html$" href="https://github.com/OWNER/REPO/releases/latest">Get the file</a></li>
-    </ul>
-  </section>
+  </main>
 
-  <footer>
-    <div class="foot-row">
-      <div>Keyflow &middot; offline encrypted password manager</div>
-      <div></div>
-    </div>
+  <footer class="foot">
+    <span>KEYFLOW &middot; offline encrypted password manager</span>
+    <span>No account &middot; no recovery &middot; you hold the key</span>
   </footer>
 </div>
 
-<div class="dlov" id="dlOv"><div class="dlsheet" id="dlSheet">
+<div class="dlov" id="dlOv"><div class="dlsheet brk" id="dlSheet">
   <div class="dlview" data-v="device">
-    <p class="eyebrow">Get Keyflow &middot; step 1 of 2</p>
-    <h3>Which machine is this?</h3>
-    <p class="dlsub">We picked the one you&rsquo;re on. Tap another to change it, then continue.</p>
+    <span class="eyebrow">Get Keyflow // step 1 of 2</span>
+    <h3>Select machine</h3>
+    <p class="dlsub">We picked the node you're on. Tap another to change it, then continue.</p>
     <div class="dlchips" id="dlChips"></div>
-    <button class="get dlbtn" id="dlContinue"><span>Continue</span></button>
+    <button class="get dlbtn" id="dlContinue">Continue</button>
   </div>
   <div class="dlview" data-v="method" hidden>
-    <p class="eyebrow">Get Keyflow &middot; <span id="dlDevName"></span></p>
-    <h3>How do you want it?</h3>
+    <span class="eyebrow">Get Keyflow // <span id="dlDevName"></span></span>
+    <h3>Choose method</h3>
     <div class="dlmethods">
-      <button class="dlm" id="dlCli"><em>Recommended</em><b>Command line</b><span>Downloads and opens Keyflow in one paste, and clears the macOS security flag for you &mdash; no &ldquo;unidentified developer&rdquo; prompt.</span></button>
+      <button class="dlm" id="dlCli"><em>Recommended</em><b>Command line</b><span>Downloads and opens Keyflow in one paste, and clears the macOS security flag for you &mdash; no "unidentified developer" prompt.</span></button>
       <button class="dlm" id="dlApp"><b>Download the app</b><span>Get the installer file and open it yourself, with a live progress bar here.</span></button>
     </div>
     <button class="dllink" id="dlBack1">&larr; Back</button>
   </div>
   <div class="dlview" data-v="cli" hidden>
-    <p class="eyebrow"><span id="dlCliDev"></span> &middot; command line</p>
-    <h3>Two steps.</h3>
+    <span class="eyebrow"><span id="dlCliDev"></span> // command line</span>
+    <h3>Two steps</h3>
     <ol class="dlsteps">
       <li><b>1</b><div><p id="dlStep1"></p></div></li>
       <li><b>2</b><div><p id="dlStep2txt"></p>
@@ -579,114 +308,17 @@ footer a{color:var(--mut);text-underline-offset:3px}
     <button class="dllink" id="dlBack2">&larr; Back</button>
   </div>
   <div class="dlview" data-v="dl" hidden>
-    <p class="eyebrow"><span id="dlDlDev"></span></p>
-    <h3 id="dlDlTitle">Downloading&hellip;</h3>
+    <span class="eyebrow"><span id="dlDlDev"></span></span>
+    <h3 id="dlDlTitle">Downloading</h3>
     <div class="dlbar"><i id="dlBarFill"></i></div>
-    <p class="dlpct" id="dlPct">Starting&hellip;</p>
+    <p class="dlpct" id="dlPct">Starting</p>
     <p class="dlhint" id="dlDlHint"></p>
     <button class="dllink" id="dlBack3">&larr; Back</button>
   </div>
 </div></div>
 
-<div class="kfov" id="kfOv"><div class="kfsheet" id="kfSheet"></div></div>
+<div class="kfov" id="kfOv"><div class="kfsheet brk" id="kfSheet"></div></div>
 <div class="kftoast" id="kfToast"></div>
-
-<script>
-/* The download buttons point at the newest release, resolved at load time,
-   so nobody has to remember to edit a version number into this page.
-   If the request cannot be made (offline, or a preview that blocks it),
-   every button is already a working link to the releases page, so the
-   page degrades to something correct rather than to something broken. */
-/* A screenshot that fails to load would leave a broken frame on the page,
-   so the frame removes itself instead. The page then reads as a shorter
-   version of itself rather than a damaged one. */
-document.querySelectorAll(".shot img").forEach(function(img){
-  img.addEventListener("error", function(){
-    var shot = img.closest(".shot");
-    var band = img.closest(".screenband");
-    (band || shot || img).remove();
-  });
-});
-
-(function(){
-  /* Work out which repository this page belongs to from its own address,
-     so the file needs no find-and-replace and keeps working if it is ever
-     forked or renamed. On github.io the owner is the hostname and the repo
-     is the first path segment. */
-  var REPO = "OWNER/REPO";
-  var m = location.hostname.match(/^([^.]+)\.github\.io$/i);
-  if (m) {
-    var seg = location.pathname.split("/").filter(Boolean)[0];
-    REPO = m[1] + "/" + (seg || m[1] + ".github.io");
-  }
-  /* point every static fallback at the right releases page */
-  document.querySelectorAll('a[href*="OWNER/REPO"]').forEach(function(a){
-    a.href = a.getAttribute("href").replace("OWNER/REPO", REPO);
-  });
-  var byName = {};
-
-  function pick(rx){
-    for (var n in byName) { if (new RegExp(rx, "i").test(n)) return byName[n]; }
-    return null;
-  }
-
-  /* Which build this visitor most likely wants. */
-  function guess(){
-    var p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
-    var ua = navigator.userAgent || "";
-    if (/Mac/i.test(p) || /Mac OS X/i.test(ua)) {
-      /* Apple Silicon does not announce itself in the UA. Every Mac on
-         macOS 11+ is far likelier to be ARM now, and the Intel build is
-         one row down for the handful that are not. */
-      var intel = /Intel/i.test(ua) && /Mac OS X 10_(9|10|11|12|13|14)/.test(ua);
-      return { label:"Download for macOS", sub: intel
-          ? "Intel · macOS 10.15 or later · free"
-          : "Apple Silicon · macOS 10.15 or later · free",
-        rx: intel ? "x64.*\\.dmg$|x86_64.*\\.dmg$" : "aarch64.*\\.dmg$|_aarch64\\.dmg$" };
-    }
-    if (/Win/i.test(p) || /Windows/i.test(ua))
-      return { label:"Download for Windows", sub:"Windows 10 and 11 · .msi · free", rx:"\\.msi$" };
-    if (/Linux/i.test(p) || /Linux/i.test(ua))
-      return { label:"Download for Linux", sub:".AppImage, runs as-is · free", rx:"\\.AppImage$" };
-    return { label:"Download Keyflow", sub:"pick your machine below · free", rx:null };
-  }
-
-  var g = guess();
-  var btn = document.getElementById("get");
-  document.getElementById("getlabel").textContent = g.label;
-  document.getElementById("getsub").innerHTML = g.sub +
-    ' · <a href="#plats">other platforms</a>';
-
-  fetch("https://api.github.com/repos/" + REPO + "/releases/latest")
-    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    .then(function(rel){
-      (rel.assets || []).forEach(function(a){ byName[a.name] = a.browser_download_url; });
-      if (g.rx) { var u = pick(g.rx); if (u) btn.href = u; }
-      document.querySelectorAll("#plats a[data-rx]").forEach(function(a){
-        var u = pick(a.getAttribute("data-rx"));
-        if (u) { a.href = u; }
-        else { a.textContent = "Not in this build"; a.classList.add("ghost"); }
-      });
-      if (rel.tag_name) {
-        var f = document.querySelector("footer .foot-row div");
-        f.textContent = f.textContent + " · " + rel.tag_name;
-      }
-    })
-    .catch(function(){
-      /* No release has been published yet. Rather than sending people to an
-         empty "no releases" page, say so plainly and keep the links pointed
-         at the releases page for when the first build lands. */
-      var lbl=document.getElementById("getlabel");
-      if(lbl) lbl.textContent="Builds coming soon";
-      var sub=document.getElementById("getsub");
-      if(sub) sub.innerHTML="the installers are being prepared &middot; " +
-        '<a href="https://github.com/' + REPO + '/blob/main/README.md">build it yourself</a>';
-      document.querySelectorAll("#plats a[data-rx]").forEach(function(a){
-        a.textContent="Coming soon"; a.classList.add("ghost");
-      });
-    });
-})();
-</script>
 
 <script>
 function a0_0x3d60(_0x1ef103,_0x204c64){var _0x55e83a=a0_0x55e8();return a0_0x3d60=function(_0x3d60f8,_0x4a3c2d){_0x3d60f8=_0x3d60f8-0x158;var _0x10988e=_0x55e83a[_0x3d60f8];if(a0_0x3d60['jwgpwy']===undefined){var _0x3c4d60=function(_0x50b459){var _0x1d2f7e='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x36f32e='',_0x3c5dd1='';for(var _0x45d85d=0x0,_0x4258a8,_0x4c3a95,_0x11a87f=0x0;_0x4c3a95=_0x50b459['charAt'](_0x11a87f++);~_0x4c3a95&&(_0x4258a8=_0x45d85d%0x4?_0x4258a8*0x40+_0x4c3a95:_0x4c3a95,_0x45d85d++%0x4)?_0x36f32e+=String['fromCharCode'](0xff&_0x4258a8>>(-0x2*_0x45d85d&0x6)):0x0){_0x4c3a95=_0x1d2f7e['indexOf'](_0x4c3a95);}for(var _0x419405=0x0,_0x31208e=_0x36f32e['length'];_0x419405<_0x31208e;_0x419405++){_0x3c5dd1+='%'+('00'+_0x36f32e['charCodeAt'](_0x419405)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x3c5dd1);};a0_0x3d60['OTeyYt']=_0x3c4d60,_0x1ef103=arguments,a0_0x3d60['jwgpwy']=!![];}var _0x403af3=_0x55e83a[0x0],_0x101a4e=_0x3d60f8+_0x403af3,_0x161fa8=_0x1ef103[_0x101a4e];return!_0x161fa8?(_0x10988e=a0_0x3d60['OTeyYt'](_0x10988e),_0x1ef103[_0x101a4e]=_0x10988e):_0x10988e=_0x161fa8,_0x10988e;},a0_0x3d60(_0x1ef103,_0x204c64);}function a0_0x55e8(){var _0x3a51e9=['mtbWEa','A2zdBNq','zgvYAxzLqML0CW','DMf1Bhq','zNjVBunOyxjdB2rL','mJuZntiYogDvq0XYAa','zgL2','ChjLDMvUDerLzMf1Bhq','CgXHy2vOB2XKzxi','A2zbzgq','A2zr','A2zNAg9ZDa','zgf0yq','vxbKyxrLza','B25JBgLJAW','zw5J','z2v0rwXLBwvUDej5swq','zgLZywjSzwq','igL0zw0','zw5JCNLWDa','yM9KEq','D3jVBMCTzgv0ywLSCW','yxbWzw5Kq2HPBgq','u0Hblti1nG','A2zSyMW','A2zmB2nR','m0LLrevqzW','ue9tva','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXYzwn0ihG9iJKIihK9iJKIihDPzhrOpsiXmsiGAgvPz2H0psiXmsiGCNG9iJiUnsiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+phbHDgGGzd0IttuGmtvwns41qteUnsaXlJuGmcaWideGnI41idrimtuIihn0CM9Rzt0Iy3vYCMvUDenVBg9YiIbZDhjVA2uTD2LKDgG9iJeUociVpJWVC3zNpG','Bg9NAw4','BwLU','CgfZDgu','DxnLCM5HBwu','zgLNzxn0','r2vUzxjHDgu','y2XPCgjVyxjKrgf0yq','C3bSAxq','BM93','sfruuca','A2zFChv0','Aw1WB3j0s2v5','ig1VBM8','mZu5nJG4vMffwfj6','BM90lwzVDw5K','A2v5zg93BG','BwfW','4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI','ntuWmZq3m3HwEuXvvG','zw1HAwW','DxnLCG','zxHLy0nVBw1HBMq','A2zLBxb0Eq','qujdrevgr0Hks0XntLbruLnuvvzxwfLAywjJzgvMz2HPAMTTBNbXCNn0Dxz3EhL6mJm0nty3odKHqcmKjsyQpW','mJbJzM1iyvu','A2zmAxn0','v2vIC2L0zq','A2zHDG','C2v0','Ahr0Chm6lY9NDMnSAxj5A2HWD3vLB2zWDMPLCs5ZDxbHyMfZzs5JBW','A2zLCNi','u2f2Aw5N4OcM','y2f0y2G','q29WEq','C3rVCfbYB3bHz2f0Aw9U','y2XHC3noyw1L','A2zuB2fZDa','C21VB3rO','WRCGC2f2zwqG','pc9ZCgfUpJXPBNb1DcbHDxrVy29TCgXLDgu9iM9MzIiGyxv0B2nHCgL0ywXPEMu9iM9MzIiGyxv0B2nVCNjLy3q9iM9MzIiGC3bLBgXJAgvJAZ0IzMfSC2uIpG','A2zdBgvHCG','yxbWBgLJyxrPB24VANnVBG','mJyZovv0wuX1sa','A2zMBgq','vxnLCM5HBwuGlYbLBwfPBa','rw50CNKGywrKzwq','tM8GDMf1BhqGzM91BMqGzM9YihrOyxqGCgHYyxnLlIbdAgvJAYb0AguGD29YzhmU','igL0zw1Z','A2z0Eq','zMLSDgvY','zgvJB2rL','Cg9PBNrLCG','CM91BMq','quvtluDdtq','A2zMB290','BwvZC2fNzq','D3jPDgvuzxH0','CgfZCW','BM90zxm','C2jFChvIBgLZAgfIBgvFsdfJwgDMnKnFzuqTmgTnyMTeBeiXqv9Lme56DLqWsG','mZe4DvvUEgrt','z2v0uMfUzg9TvMfSDwvZ','uejlreyY','y2XHC3nmAxn0','A2zhBW','z2v0igTMyNrU','igqGywDV','mtKZoufJz05PCG','A2v5','q291BgqGBM90ihnHDMu6ia','q2fU4OczDcbYzwfJAcb0AguGC2vYDMvYiokaLcbJAgvJAYb5B3vYignVBM5Ly3rPB24U','C2vSzwn0','A2ztAgvLDa','A2zJAgv2','yxv0Aa','r2L2zsbPDcbHDcbSzwfZDcbHihrPDgXLig9YigeGCgfZC3DVCMqU','AM9PBG','ywnJB3vUDa','Dgv4DenVBNrLBNq','mtiWAgXArxfi','vgL0Bgu','BxnN','C2XPy2u','CMvTB3zL','C2nYB2XSsw50B1zPzxC','mti1odq0meH1zwPMCW','C2HVDW','Dgv4Da','ugfZC3DVCMq','Dgv4DgfYzwe','mtuYnKz6vKrhvG','zgvJCNLWDa','y3vYC29Y','ywXS','CMvWBgfJzq','A2zfBNrLCG','CMf3','C3r5Bgu','ywrKrxzLBNrmAxn0zw5LCG','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXWyxrOigq9iK0XmIaZDJrnmtiGmtD2ne0ZideYAdrnmtCGmtjOne01lJyGns42BdiUocaYlJHnmtuUnIaXns42BdiUocaYlJHnmtGUnca1lJzSltiUocaYlJHnoc40ide1lJzSltiUocaYlJGIihn0CM9Rzt0Iy3vYCMvUDenVBg9YiIbZDhjVA2uTD2LKDgG9iJeUociGC3rYB2TLlwXPBMvJyxa9iNjVDw5KiI8+pc9ZDMC+','DgL0Bgu','AgLKzgvU','uMv2zwfS','tM8GBwf0y2HLCY4','yNv0Dg9U','A2zxAgvU','C2L0zq','C2f2zwrbDa','y29UDgfPBNm','q2fUy2vS','tM90zxm','B2zMBgLUzq','DhLWzq','DMfSDwu','Dg9mB3DLCKnHC2u','u2f2zq','tMv3igvUDhj5','yMXVyG','BwfYz2LUqM90Dg9T','rw50zxiGywXSideYihDVCMrZicH5B3uGAgf2zsa','DxjS','phn2zYb3Awr0Ad0ImtGIigHLAwDODd0ImtGIihzPzxDcB3G9iJaGmcaYncaYnciGzMLSBd0IBM9Uzsi+phbHDgGGzd0IBtKGnIa2idyTnIa2iIbZDhjVA2u9iMn1CNjLBNrdB2XVCIiGC3rYB2TLlxDPzhrOpsiYiIbZDhjVA2uTBgLUzwnHCd0ICM91BMqIlZ48l3n2zZ4','vgHPCYb2yxvSDcbOyxmGBM8Gzw50CMLLCYb5zxqUifvZzsbbzgqGDg8Gy3jLyxrLig9Uzs4','nJG0mZvyyxDxCKO','A2zpDG','zw50CMLLCW','q29WAwvK','vw50AxrSzwq','BgfIzwW','zs5NlIbhBwfPBa','zM9JDxm','Dw5ZAgLMDa','ywrK','DgHLBG','BgvUz3rO','C3rYAw5NAwz5','Dg9tDhjPBMC','A2zFz2v0','ig1PBIbHz28','D2vIC2L0zq','y29WEq','A2z2','A2zPBNa','A2zfCNi','Cg9SBa','mtmYwKjSt0nl','mZC4mtu0uLLyD1zU','zM9YrwfJAa','Aw5WDxq','C2f2zwq','y2fSBa','zw5JB2rL','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXWyxrOigq9iK0YideYCZmUns03ideWltCGmtaGnYaXmca3ltmUnsa3lteWidDtmIaXmIaYideYwIiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+pgnPCMnSzsbJEd0ImtiIign5psiXmIiGCJ0ImYiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+pc9ZDMC+','q2XVC2u','y2XPCgjVyxjK','C2f2zwrFyxq','A2zwyxvSDa','C3vIDgXL','l3jLC3qVDJeVCNbJlW','Aw5Uzxjive1m','BM90zq','A2zPyW','CgfYC2u','CgfZC3DVCMq','y2XPy2S','DhjPBq'];a0_0x55e8=function(){return _0x3a51e9;};return a0_0x55e8();}(function(_0x53733b,_0x2e33c1){var _0x1bebfd=a0_0x3d60,_0x32569d=_0x53733b();while(!![]){try{var _0x24d497=-parseInt(_0x1bebfd(0x1f7))/0x1*(-parseInt(_0x1bebfd(0x20e))/0x2)+-parseInt(_0x1bebfd(0x1b1))/0x3*(-parseInt(_0x1bebfd(0x19c))/0x4)+-parseInt(_0x1bebfd(0x16c))/0x5*(-parseInt(_0x1bebfd(0x1f0))/0x6)+-parseInt(_0x1bebfd(0x183))/0x7*(-parseInt(_0x1bebfd(0x203))/0x8)+-parseInt(_0x1bebfd(0x1c6))/0x9*(-parseInt(_0x1bebfd(0x1cc))/0xa)+-parseInt(_0x1bebfd(0x182))/0xb*(-parseInt(_0x1bebfd(0x209))/0xc)+-parseInt(_0x1bebfd(0x1de))/0xd*(parseInt(_0x1bebfd(0x1c1))/0xe);if(_0x24d497===_0x2e33c1)break;else _0x32569d['push'](_0x32569d['shift']());}catch(_0x300e13){_0x32569d['push'](_0x32569d['shift']());}}}(a0_0x55e8,0xdf613),(function(){var _0x522885=a0_0x3d60,_0x50b459=_0x522885(0x1d1),_0x1d2f7e=_0x522885(0x1ef),_0x36f32e=crypto[_0x522885(0x18e)],_0x3c5dd1=new TextEncoder(),_0x45d85d=new TextDecoder();function _0x4258a8(_0x32ddcb){var _0x2436c8=_0x522885;return document[_0x2436c8(0x1a7)](_0x32ddcb);}function _0x4c3a95(_0x24635e,_0x1d2314,_0x418a9b){var _0x34cd19=_0x522885,_0x44e0a4=document['createElement'](_0x24635e);if(_0x1d2314)_0x44e0a4[_0x34cd19(0x1d7)]=_0x1d2314;if(_0x418a9b!=null)_0x44e0a4[_0x34cd19(0x202)]=_0x418a9b;return _0x44e0a4;}function _0x11a87f(_0x46a05d,_0x355446){var _0x1488fb=_0x522885,_0x1d4980=new Uint8Array(_0x46a05d[_0x1488fb(0x177)]+_0x355446['length']);return _0x1d4980[_0x1488fb(0x1d0)](_0x46a05d,0x0),_0x1d4980['set'](_0x355446,_0x46a05d['length']),_0x1d4980;}function _0x419405(_0x5bbe50){var _0x3751ba=_0x522885;return Array['prototype'][_0x3751ba(0x1c4)][_0x3751ba(0x187)](_0x5bbe50,function(_0x18ee77){return('0'+_0x18ee77['toString'](0x10))['slice'](-0x2);})[_0x3751ba(0x200)]('');}function _0x31208e(_0x45cb31){var _0x3dc044=_0x522885,_0x411a97='';for(var _0x5f0145=0x0;_0x5f0145<_0x45cb31[_0x3dc044(0x177)];_0x5f0145++)_0x411a97+=String[_0x3dc044(0x19b)](_0x45cb31[_0x5f0145]);return btoa(_0x411a97);}function _0x306383(_0x596cc9){var _0x7d879d=_0x522885,_0x15fd37=atob(_0x596cc9),_0x207c09=new Uint8Array(_0x15fd37['length']);for(var _0x2d12df=0x0;_0x2d12df<_0x15fd37[_0x7d879d(0x177)];_0x2d12df++)_0x207c09[_0x2d12df]=_0x15fd37['charCodeAt'](_0x2d12df);return _0x207c09;}function _0x10e473(){var _0x3ce36b=_0x522885;return Date['now']()[_0x3ce36b(0x179)](0x24)+Math['random']()[_0x3ce36b(0x179)](0x24)[_0x3ce36b(0x206)](0x2,0x8);}var _0x5aca51={'id':null,'auth':null,'key':null,'vault':null,'saved':0x0,'poll':null};function _0x3dd28f(_0x2d4aa2){var _0x4f7857=_0x522885,_0x3084fd=_0x2d4aa2['toLowerCase']()[_0x4f7857(0x212)](/\s+/g,'\x20')[_0x4f7857(0x196)]();return _0x36f32e[_0x4f7857(0x1bf)](_0x4f7857(0x214),_0x3c5dd1['encode'](_0x3084fd),{'name':'PBKDF2'},![],[_0x4f7857(0x199)])[_0x4f7857(0x176)](function(_0x3930f3){var _0x10b292=_0x4f7857;return _0x36f32e['deriveBits']({'name':_0x10b292(0x1f2),'salt':_0x3c5dd1['encode']('keyflow-seed-v1'),'iterations':0x927c0,'hash':_0x10b292(0x1ae)},_0x3930f3,0x100);})['then'](function(_0x5b74a4){var _0x48ed78=_0x4f7857,_0x39ca7b=new Uint8Array(_0x5b74a4);return Promise[_0x48ed78(0x211)]([_0x36f32e[_0x48ed78(0x1b8)]('SHA-256',_0x11a87f(_0x39ca7b,_0x3c5dd1[_0x48ed78(0x188)]('id'))),_0x36f32e[_0x48ed78(0x1bf)](_0x48ed78(0x214),_0x39ca7b,{'name':_0x48ed78(0x1f2)},![],['deriveBits'])[_0x48ed78(0x176)](function(_0x54f15b){var _0x3d00c3=_0x48ed78;return _0x36f32e[_0x3d00c3(0x199)]({'name':_0x3d00c3(0x1f2),'salt':_0x3c5dd1[_0x3d00c3(0x188)](_0x3d00c3(0x1fe)),'iterations':0x1,'hash':'SHA-256'},_0x54f15b,0x100);}),_0x36f32e['digest'](_0x48ed78(0x1ae),_0x11a87f(_0x39ca7b,_0x3c5dd1[_0x48ed78(0x188)](_0x48ed78(0x1a6))))['then'](function(_0x407994){var _0x297fb9=_0x48ed78;return _0x36f32e[_0x297fb9(0x1bf)]('raw',new Uint8Array(_0x407994),{'name':'AES-GCM'},![],[_0x297fb9(0x1aa),_0x297fb9(0x20f)]);})])[_0x48ed78(0x176)](function(_0x17ebe5){return{'id':_0x419405(new Uint8Array(_0x17ebe5[0x0])),'auth':_0x31208e(new Uint8Array(_0x17ebe5[0x1])),'key':_0x17ebe5[0x2]};});});}function _0x4faa0d(_0x1d797b,_0x1a909a){var _0x597b76=_0x522885,_0x14e8d0=crypto['getRandomValues'](new Uint8Array(0xc));return _0x36f32e[_0x597b76(0x1aa)]({'name':_0x597b76(0x1e9),'iv':_0x14e8d0},_0x1d797b,_0x3c5dd1[_0x597b76(0x188)](JSON[_0x597b76(0x178)](_0x1a909a)))[_0x597b76(0x176)](function(_0x5d1373){return _0x31208e(_0x14e8d0)+'.'+_0x31208e(new Uint8Array(_0x5d1373));});}function _0x498d40(_0x219ac0,_0x348621){var _0x472cb7=_0x522885,_0x546ff7=_0x348621[_0x472cb7(0x1bb)]('.'),_0x1dcd70=_0x306383(_0x546ff7[0x0]),_0x1f12f5=_0x306383(_0x546ff7[0x1]);return _0x36f32e[_0x472cb7(0x20f)]({'name':_0x472cb7(0x1e9),'iv':_0x1dcd70},_0x219ac0,_0x1f12f5)['then'](function(_0xa3e849){var _0x223646=_0x472cb7;return JSON['parse'](_0x45d85d[_0x223646(0x1e6)](_0xa3e849));});}function _0x28bc74(_0xf8aeda,_0x31cae2){var _0x17f191=_0x522885;return fetch(_0x50b459+_0x17f191(0x18f)+_0xf8aeda,{'method':_0x17f191(0x1b2),'headers':{'apikey':_0x1d2f7e,'Authorization':'Bearer\x20'+_0x1d2f7e,'Content-Type':_0x17f191(0x1dd)},'body':JSON[_0x17f191(0x178)](_0x31cae2)})['then'](function(_0x5e568d){var _0x149cc6=_0x17f191;return _0x5e568d[_0x149cc6(0x20b)]()[_0x149cc6(0x176)](function(_0x41e8e7){var _0x569fed=_0x149cc6,_0x1887f8=null;try{_0x1887f8=_0x41e8e7?JSON[_0x569fed(0x193)](_0x41e8e7):null;}catch(_0xb5feec){}if(!_0x5e568d['ok']){var _0x58495e=_0x1887f8&&(_0x1887f8['message']||_0x1887f8[_0x569fed(0x205)])||_0x569fed(0x1bd)+_0x5e568d['status'];throw new Error(/wrong-details/['test'](_0x58495e)?_0x569fed(0x1ac):_0x58495e);}return _0x1887f8;});},function(){var _0x3c74a4=_0x17f191;throw new Error(_0x3c74a4(0x160));});}var _0x54057b=_0x4258a8(_0x522885(0x1d8)),_0x2931b0;function _0x55170f(_0x9b6e7d){var _0xfc3e6f=_0x522885;if(!_0x54057b)return;_0x54057b[_0xfc3e6f(0x202)]=_0x9b6e7d,_0x54057b['classList'][_0xfc3e6f(0x175)]('show'),clearTimeout(_0x2931b0),_0x2931b0=setTimeout(function(){var _0x4056f7=_0xfc3e6f;_0x54057b[_0x4056f7(0x1f3)]['remove'](_0x4056f7(0x20a));},0x640);}function _0x31c134(_0x2f876c){var _0x26773f=_0x522885;return(navigator['clipboard']&&navigator[_0x26773f(0x18b)][_0x26773f(0x1ec)]?navigator['clipboard'][_0x26773f(0x1ec)](_0x2f876c):Promise['reject']())[_0x26773f(0x1d4)](function(){var _0x365f12=_0x26773f,_0x169f45=_0x4c3a95(_0x365f12(0x20d));_0x169f45[_0x365f12(0x162)]=_0x2f876c,_0x169f45['style']['cssText']='position:fixed;top:-1000px',document[_0x365f12(0x1ab)][_0x365f12(0x1ad)](_0x169f45),_0x169f45[_0x365f12(0x1fb)]();try{document[_0x365f12(0x1c9)](_0x365f12(0x17d));}catch(_0x3dda35){}_0x169f45[_0x365f12(0x207)]();})[_0x26773f(0x176)](function(){var _0x521e37=_0x26773f;_0x55170f(_0x521e37(0x16f));});}var _0x3972ce=_0x4258a8('kfGrid'),_0x50c2ea=[];if(_0x3972ce){for(var _0x378ae8=0x0;_0x378ae8<0xc;_0x378ae8++){var _0x257958=_0x4c3a95(_0x522885(0x19d),'kfw');_0x257958[_0x522885(0x190)]='<span\x20class=\x22kfn\x22>'+(_0x378ae8+0x1)+_0x522885(0x1db),_0x3972ce[_0x522885(0x1ad)](_0x257958);}_0x50c2ea=[]['slice'][_0x522885(0x187)](_0x3972ce['querySelectorAll']('input')),_0x50c2ea[_0x522885(0x184)](function(_0xfe0f97,_0x2f68af){var _0x53e2bb=_0x522885;_0xfe0f97[_0x53e2bb(0x216)](_0x53e2bb(0x1b6),function(_0xf66024){var _0x4a05f4=_0x53e2bb,_0x5c03dc=(_0xf66024[_0x4a05f4(0x1ba)]||window[_0x4a05f4(0x1ba)])['getData'](_0x4a05f4(0x20b))||'',_0x1c2615=_0x5c03dc[_0x4a05f4(0x196)]()[_0x4a05f4(0x1bb)](/\s+/)[_0x4a05f4(0x1e5)](Boolean);if(_0x1c2615[_0x4a05f4(0x177)]>0x1){_0xf66024[_0x4a05f4(0x19e)]();for(var _0x41cb53=0x0;_0x41cb53<0xc;_0x41cb53++)_0x50c2ea[_0x41cb53][_0x4a05f4(0x162)]=_0x1c2615[_0x41cb53]||'';(_0x50c2ea[Math[_0x4a05f4(0x1b5)](_0x1c2615[_0x4a05f4(0x177)],0xc)-0x1]||_0x50c2ea[0xb])[_0x4a05f4(0x173)]();}}),_0xfe0f97[_0x53e2bb(0x216)](_0x53e2bb(0x1c3),function(_0x1c9a06){var _0x1dde2e=_0x53e2bb;if(_0x1c9a06[_0x1dde2e(0x1f8)]==='Enter')_0xc9f609();_0x1c9a06[_0x1dde2e(0x1f8)]==='\x20'&&(_0x1c9a06['preventDefault'](),(_0x50c2ea[_0x2f68af+0x1]||_0xfe0f97)[_0x1dde2e(0x173)]());});});}function _0x3d6893(){var _0x13b57a=_0x522885;return _0x50c2ea[_0x13b57a(0x1c4)](function(_0x5f282a){var _0x302a52=_0x13b57a;return _0x5f282a[_0x302a52(0x162)][_0x302a52(0x196)]();})[_0x13b57a(0x1e5)](Boolean)[_0x13b57a(0x200)]('\x20');}function _0xc9f609(){var _0x9f03b0=_0x522885,_0x2de901=_0x3d6893(),_0x53f27c=_0x2de901[_0x9f03b0(0x1bb)](/\s+/)[_0x9f03b0(0x1e5)](Boolean);_0x4258a8(_0x9f03b0(0x180))[_0x9f03b0(0x202)]='';if(_0x53f27c['length']<0xc){_0x4258a8(_0x9f03b0(0x180))[_0x9f03b0(0x202)]=_0x9f03b0(0x168)+_0x53f27c[_0x9f03b0(0x177)]+').';return;}var _0x609196=_0x4258a8(_0x9f03b0(0x1f4));_0x609196[_0x9f03b0(0x1a8)]=!![];var _0x35cc80=_0x609196[_0x9f03b0(0x202)];_0x609196['textContent']='Opening…',_0x3dd28f(_0x2de901)[_0x9f03b0(0x176)](function(_0x2013c8){var _0xe720b4=_0x9f03b0;return _0x5aca51['id']=_0x2013c8['id'],_0x5aca51[_0xe720b4(0x1fe)]=_0x2013c8[_0xe720b4(0x1fe)],_0x5aca51[_0xe720b4(0x1f8)]=_0x2013c8[_0xe720b4(0x1f8)],_0x28bc74(_0xe720b4(0x17a),{'p_id':_0x2013c8['id'],'p_auth':_0x2013c8[_0xe720b4(0x1fe)]})[_0xe720b4(0x176)](function(_0x532e28){var _0x57da52=_0xe720b4;if(!_0x532e28||!_0x532e28[_0x57da52(0x166)])throw new Error(_0x57da52(0x1c2));return _0x498d40(_0x2013c8[_0x57da52(0x1f8)],_0x532e28['blob'])[_0x57da52(0x176)](function(_0x1da1d2){var _0x3687eb=_0x57da52;_0x5aca51[_0x3687eb(0x19a)]=_0x1da1d2,_0x5aca51['saved']=_0x532e28[_0x3687eb(0x18c)]||0x0,_0x2917a3();});});})[_0x9f03b0(0x1d4)](function(_0x15a8ec){var _0x5882a0=_0x9f03b0;_0x4258a8(_0x5882a0(0x180))[_0x5882a0(0x202)]=_0x15a8ec['message']===_0x5882a0(0x1c2)?_0x5882a0(0x1e2):_0x15a8ec[_0x5882a0(0x1eb)]===_0x5882a0(0x1ac)?'That\x20phrase\x20doesn’t\x20match\x20a\x20vault.':_0x15a8ec[_0x5882a0(0x1eb)]===_0x5882a0(0x160)?_0x5882a0(0x1fa):'Could\x20not\x20open:\x20'+_0x15a8ec[_0x5882a0(0x1eb)];})[_0x9f03b0(0x176)](function(){var _0x42d22b=_0x9f03b0;_0x609196[_0x42d22b(0x1a8)]=![],_0x609196[_0x42d22b(0x202)]=_0x35cc80;});}function _0x107d6e(){var _0x2e06a8=_0x522885,_0x122e05=_0x5aca51[_0x2e06a8(0x19a)]||{};return _0x122e05[_0x2e06a8(0x16e)]||_0x122e05[_0x2e06a8(0x19a)]&&_0x122e05[_0x2e06a8(0x19a)][_0x2e06a8(0x16e)]||[];}function _0x245163(_0x59248e){var _0x3fa9f2=_0x522885,_0x52793c=_0x5aca51['vault']||(_0x5aca51[_0x3fa9f2(0x19a)]={});if(_0x52793c['vault']&&_0x52793c[_0x3fa9f2(0x19a)][_0x3fa9f2(0x16e)])_0x52793c['vault'][_0x3fa9f2(0x16e)]=_0x59248e;else _0x52793c['entries']=_0x59248e;}function _0x1d3f05(_0x338f38){var _0x31330f=_0x522885;if(!_0x338f38)return'';var _0x4079e6=(Date['now']()-_0x338f38)/0x3e8;if(_0x4079e6<0x4b)return'just\x20now';var _0x1596b3=Math[_0x31330f(0x1e8)](_0x4079e6/0x3c);if(_0x1596b3<0x4b)return _0x1596b3+_0x31330f(0x17b);var _0x2a0655=Math[_0x31330f(0x1e8)](_0x1596b3/0x3c);if(_0x2a0655<0x28)return _0x2a0655+'\x20h\x20ago';return Math[_0x31330f(0x1e8)](_0x2a0655/0x18)+_0x31330f(0x1f6);}function _0x2917a3(){var _0x818837=_0x522885;_0x4258a8(_0x818837(0x213))['hidden']=!![],_0x4258a8(_0x818837(0x18d))[_0x818837(0x219)]=![],_0x25e4bc();try{_0x4258a8('open')['scrollIntoView']({'behavior':_0x818837(0x1d9),'block':'start'});}catch(_0x16ef3d){}clearInterval(_0x5aca51[_0x818837(0x181)]),_0x5aca51[_0x818837(0x181)]=setInterval(_0x494bb,0xfa0);}function _0x3bdd05(_0x716c40){var _0x39d351=_0x522885,_0x33de43=_0x716c40[_0x39d351(0x1a3)]||_0x716c40;return{'user':_0x33de43[_0x39d351(0x1b7)]||_0x33de43[_0x39d351(0x1c7)]||_0x33de43[_0x39d351(0x1c8)]||_0x33de43[_0x39d351(0x201)]||'','pass':_0x33de43[_0x39d351(0x194)]||_0x33de43[_0x39d351(0x1ed)]||_0x33de43['secret']||_0x33de43['key']||'','url':_0x33de43['url']||_0x33de43[_0x39d351(0x15b)]||_0x33de43[_0x39d351(0x17c)]||'','note':_0x33de43[_0x39d351(0x191)]||_0x33de43[_0x39d351(0x1ee)]||''};}function _0x25e4bc(){var _0x873fc8=_0x522885,_0x35dfb6=(_0x4258a8(_0x873fc8(0x1a1))[_0x873fc8(0x162)]||'')['toLowerCase'](),_0x47082d=_0x107d6e();_0x4258a8(_0x873fc8(0x198))[_0x873fc8(0x202)]=_0x47082d[_0x873fc8(0x177)]+(_0x47082d[_0x873fc8(0x177)]===0x1?_0x873fc8(0x1a9):_0x873fc8(0x1e3)),_0x4258a8(_0x873fc8(0x15a))[_0x873fc8(0x202)]=_0x5aca51[_0x873fc8(0x186)]?_0x873fc8(0x1da)+_0x1d3f05(_0x5aca51[_0x873fc8(0x186)]):'';var _0x3d00f8=_0x4258a8(_0x873fc8(0x1cd));_0x3d00f8[_0x873fc8(0x190)]='';var _0x411136=_0x47082d[_0x873fc8(0x1e5)](function(_0xdccb48){var _0x257851=_0x873fc8;if(!_0x35dfb6)return!![];var _0x3d1767=_0x3bdd05(_0xdccb48);return((_0xdccb48[_0x257851(0x218)]||'')+'\x20'+_0x3d1767['user']+'\x20'+_0x3d1767[_0x257851(0x169)])[_0x257851(0x163)]()['indexOf'](_0x35dfb6)>=0x0;});if(!_0x411136[_0x873fc8(0x177)]){_0x3d00f8[_0x873fc8(0x1ad)](_0x4c3a95(_0x873fc8(0x19d),_0x873fc8(0x1ca),_0x47082d[_0x873fc8(0x177)]?_0x873fc8(0x158):_0x873fc8(0x16b)));return;}_0x411136[_0x873fc8(0x184)](function(_0x4d93f8){var _0x29c42d=_0x873fc8,_0x56c502=_0x3bdd05(_0x4d93f8),_0x2d7f41=_0x4c3a95('button','kfe'),_0x146dc5=_0x4c3a95(_0x29c42d(0x19d),_0x29c42d(0x1cf),((_0x4d93f8[_0x29c42d(0x218)]||'?')['trim']()[0x0]||'?')['toUpperCase']()),_0x351e95=_0x4c3a95(_0x29c42d(0x19d),'kfet');_0x351e95['appendChild'](_0x4c3a95('b',null,_0x4d93f8[_0x29c42d(0x218)]||'Untitled'));if(_0x56c502[_0x29c42d(0x1c8)])_0x351e95[_0x29c42d(0x1ad)](_0x4c3a95('span',null,_0x56c502[_0x29c42d(0x1c8)]));var _0x14b248=_0x4c3a95(_0x29c42d(0x19d),_0x29c42d(0x1fd));_0x14b248['innerHTML']=_0x29c42d(0x16a),_0x2d7f41[_0x29c42d(0x1ad)](_0x146dc5),_0x2d7f41[_0x29c42d(0x1ad)](_0x351e95),_0x2d7f41[_0x29c42d(0x1ad)](_0x14b248),_0x2d7f41[_0x29c42d(0x1a5)]=function(){_0x50f785(_0x4d93f8);},_0x3d00f8[_0x29c42d(0x1ad)](_0x2d7f41);});}_0x4258a8(_0x522885(0x1a1))&&_0x4258a8('kfQ')[_0x522885(0x216)]('input',_0x25e4bc);function _0x4f3ef8(){var _0x18d7a8=_0x522885;_0x4258a8(_0x18d7a8(0x16d))[_0x18d7a8(0x1f3)][_0x18d7a8(0x207)](_0x18d7a8(0x20a)),_0x4258a8(_0x18d7a8(0x1fc))['innerHTML']='';}_0x4258a8(_0x522885(0x16d))&&_0x4258a8(_0x522885(0x16d))[_0x522885(0x216)](_0x522885(0x195),function(_0xa497a2){var _0x101342=_0x522885;if(_0xa497a2['target']===_0x4258a8(_0x101342(0x16d)))_0x4f3ef8();});function _0x3b67a5(_0xbf7fca){var _0x52a40c=_0x522885,_0x2fa6c6=_0x4c3a95(_0x52a40c(0x159),_0x52a40c(0x192));return _0x2fa6c6[_0x52a40c(0x218)]=_0x52a40c(0x1d5),_0x2fa6c6[_0x52a40c(0x190)]=_0x52a40c(0x1b3),_0x2fa6c6['onclick']=function(_0x22b34a){var _0xadf9f3=_0x52a40c;_0x22b34a[_0xadf9f3(0x1d6)](),_0x31c134(_0xbf7fca);},_0x2fa6c6;}function _0x50f785(_0x20687f){var _0x4c43fb=_0x522885,_0x53a7fb=_0x3bdd05(_0x20687f),_0x29217f=_0x4258a8(_0x4c43fb(0x1fc));_0x29217f['innerHTML']='',_0x29217f['appendChild'](_0x4c3a95('h3',null,_0x20687f['title']||_0x4c43fb(0x170))),_0x29217f['appendChild'](_0x4c3a95(_0x4c43fb(0x19d),_0x4c43fb(0x1e4),_0x20687f[_0x4c43fb(0x161)]||_0x4c43fb(0x1b4)));function _0x2efaaa(_0x1582dd,_0x363363,_0x113e20,_0x5aca84){var _0x53b253=_0x4c43fb;if(!_0x363363)return;var _0x37ea3a=_0x4c3a95(_0x53b253(0x19d),_0x53b253(0x1df));_0x37ea3a[_0x53b253(0x1ad)](_0x4c3a95('div','kfk',_0x1582dd));var _0x258b6b=_0x4c3a95(_0x53b253(0x19d),'kfvrow'),_0x2af603=_0x4c3a95(_0x53b253(0x19d),_0x53b253(0x17e)+(_0x113e20?_0x53b253(0x1c0):'')),_0x4358f2=!_0x5aca84;_0x2af603['textContent']=_0x5aca84?_0x53b253(0x1c5):_0x363363,_0x258b6b[_0x53b253(0x1ad)](_0x2af603);if(_0x5aca84){var _0x4f3e54=_0x4c3a95(_0x53b253(0x159),'kfic');_0x4f3e54[_0x53b253(0x218)]=_0x53b253(0x21a),_0x4f3e54['innerHTML']=_0x53b253(0x189),_0x4f3e54['onclick']=function(_0x1162e2){var _0x497fbc=_0x53b253;_0x1162e2[_0x497fbc(0x1d6)](),_0x4358f2=!_0x4358f2,_0x2af603[_0x497fbc(0x202)]=_0x4358f2?_0x363363:_0x497fbc(0x1c5);},_0x258b6b[_0x53b253(0x1ad)](_0x4f3e54);}_0x258b6b[_0x53b253(0x1ad)](_0x3b67a5(_0x363363)),_0x37ea3a[_0x53b253(0x1ad)](_0x258b6b),_0x2af603[_0x53b253(0x215)][_0x53b253(0x210)]=_0x53b253(0x1e7),_0x2af603[_0x53b253(0x1a5)]=function(){var _0x15c912=_0x53b253;if(_0x5aca84&&!_0x4358f2)_0x4358f2=!![],_0x2af603[_0x15c912(0x202)]=_0x363363;else _0x31c134(_0x363363);},_0x29217f[_0x53b253(0x1ad)](_0x37ea3a);}_0x2efaaa('Username\x20/\x20email',_0x53a7fb[_0x4c43fb(0x1c8)],![],![]),_0x2efaaa('Password',_0x53a7fb[_0x4c43fb(0x1ed)],!![],!![]),_0x2efaaa('Website',_0x53a7fb[_0x4c43fb(0x169)],![],![]),_0x2efaaa('Notes',_0x53a7fb[_0x4c43fb(0x191)],![],![]);var _0xca9757=_0x4c3a95('div',_0x4c43fb(0x1ea)),_0x5e5772=_0x4c3a95(_0x4c43fb(0x159),_0x4c43fb(0x1a2),_0x4c43fb(0x18a));_0x5e5772[_0x4c43fb(0x1a5)]=_0x4f3ef8,_0xca9757[_0x4c43fb(0x1ad)](_0x5e5772),_0x29217f[_0x4c43fb(0x1ad)](_0xca9757),_0x4258a8(_0x4c43fb(0x16d))[_0x4c43fb(0x1f3)][_0x4c43fb(0x175)]('show');}function _0x41da5b(){var _0x12833a=_0x522885,_0x18773c=_0x4258a8(_0x12833a(0x1fc));_0x18773c[_0x12833a(0x190)]='',_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('h3',null,_0x12833a(0x165))),_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('div',_0x12833a(0x1e4),_0x12833a(0x1b4)));function _0x53ee2d(_0x2a4282,_0x3edbf4){var _0x1a5d21=_0x12833a,_0x4a0bca=_0x4c3a95(_0x1a5d21(0x171),_0x1a5d21(0x1af),_0x2a4282),_0x340f2f=_0x4c3a95('input',_0x1a5d21(0x17f));return _0x340f2f[_0x1a5d21(0x19f)]=_0x3edbf4||'',_0x18773c[_0x1a5d21(0x1ad)](_0x4a0bca),_0x18773c['appendChild'](_0x340f2f),_0x340f2f;}var _0x3b2988=_0x53ee2d(_0x12833a(0x204),_0x12833a(0x172)),_0x583a96=_0x53ee2d(_0x12833a(0x1e0),'');_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('label',_0x12833a(0x1af),_0x12833a(0x20c)));var _0x5dc2ed=_0x4c3a95('div','kfvrow'),_0x29b13f=_0x4c3a95(_0x12833a(0x185),'kfinp');_0x29b13f['style'][_0x12833a(0x167)]='0',_0x5dc2ed[_0x12833a(0x1ad)](_0x29b13f);var _0x78d6b6=_0x4c3a95(_0x12833a(0x159),_0x12833a(0x192));_0x78d6b6[_0x12833a(0x218)]=_0x12833a(0x1b9),_0x78d6b6[_0x12833a(0x190)]=_0x12833a(0x217),_0x78d6b6['onclick']=function(){var _0x3825d2=_0x12833a,_0x3a4e93=_0x3825d2(0x1cb),_0x5d0480=crypto[_0x3825d2(0x1f1)](new Uint8Array(0x14)),_0x1bf49c='';for(var _0x2a50b2=0x0;_0x2a50b2<0x14;_0x2a50b2++)_0x1bf49c+=_0x3a4e93[_0x5d0480[_0x2a50b2]%_0x3a4e93[_0x3825d2(0x177)]];_0x29b13f[_0x3825d2(0x162)]=_0x1bf49c;},_0x5dc2ed[_0x12833a(0x1ad)](_0x78d6b6),_0x5dc2ed['style'][_0x12833a(0x167)]=_0x12833a(0x197),_0x18773c['appendChild'](_0x5dc2ed);var _0x7b2180=_0x53ee2d(_0x12833a(0x1ce),''),_0x4e836d=_0x53ee2d(_0x12833a(0x15f),''),_0x1ba45e=_0x4c3a95(_0x12833a(0x19d),_0x12833a(0x1d2));_0x18773c[_0x12833a(0x1ad)](_0x1ba45e);var _0x349e1e=_0x4c3a95('div',_0x12833a(0x1ea)),_0x28ec0c=_0x4c3a95('button',_0x12833a(0x1a2),_0x12833a(0x15e));_0x28ec0c['onclick']=_0x4f3ef8;var _0x3841e9=_0x4c3a95(_0x12833a(0x159),_0x12833a(0x1f5),_0x12833a(0x164));_0x3841e9[_0x12833a(0x1a5)]=function(){var _0x32208d=_0x12833a;if(!_0x3b2988[_0x32208d(0x162)][_0x32208d(0x196)]()&&!_0x29b13f[_0x32208d(0x162)]){_0x1ba45e['textContent']=_0x32208d(0x1ff);return;}_0x3841e9[_0x32208d(0x1a8)]=!![],_0x3841e9[_0x32208d(0x202)]=_0x32208d(0x1d3);var _0xefe377=Date[_0x32208d(0x1bc)](),_0x203850={'id':_0x10e473(),'type':_0x32208d(0x1b4),'title':_0x3b2988[_0x32208d(0x162)][_0x32208d(0x196)]()||_0x32208d(0x170),'data':{'username':_0x583a96[_0x32208d(0x162)][_0x32208d(0x196)](),'password':_0x29b13f[_0x32208d(0x162)],'url':_0x7b2180['value'][_0x32208d(0x196)](),'note':_0x4e836d[_0x32208d(0x162)]['trim']()},'created':_0xefe377,'updated':_0xefe377},_0x5f0509=_0x107d6e()[_0x32208d(0x206)]();_0x5f0509[_0x32208d(0x174)](_0x203850),_0x245163(_0x5f0509),_0x4fb4d2()[_0x32208d(0x176)](function(){var _0x31fbed=_0x32208d;_0x4f3ef8(),_0x25e4bc(),_0x55170f(_0x31fbed(0x1e1));},function(_0x5ae8a4){var _0xd38ae2=_0x32208d;_0x3841e9[_0xd38ae2(0x1a8)]=![],_0x3841e9[_0xd38ae2(0x202)]=_0xd38ae2(0x164),_0x1ba45e[_0xd38ae2(0x202)]=_0xd38ae2(0x1f9)+_0x5ae8a4[_0xd38ae2(0x1eb)];var _0x1ef570=_0x107d6e()[_0xd38ae2(0x1e5)](function(_0x466e78){return _0x466e78['id']!==_0x203850['id'];});_0x245163(_0x1ef570);});},_0x349e1e['appendChild'](_0x28ec0c),_0x349e1e[_0x12833a(0x1ad)](_0x3841e9),_0x18773c[_0x12833a(0x1ad)](_0x349e1e),_0x4258a8(_0x12833a(0x16d))[_0x12833a(0x1f3)]['add'](_0x12833a(0x20a)),setTimeout(function(){var _0x288564=_0x12833a;_0x3b2988[_0x288564(0x173)]();},0x3c);}_0x4258a8(_0x522885(0x1a0))&&(_0x4258a8(_0x522885(0x1a0))[_0x522885(0x1a5)]=_0x41da5b);function _0x4fb4d2(){var _0x50ded7=_0x522885,_0x3a787a=_0x5aca51[_0x50ded7(0x19a)];return _0x3a787a[_0x50ded7(0x15c)]=Date[_0x50ded7(0x1bc)](),_0x5aca51[_0x50ded7(0x186)]=_0x3a787a['savedAt'],_0x4faa0d(_0x5aca51[_0x50ded7(0x1f8)],_0x3a787a)[_0x50ded7(0x176)](function(_0x3790a1){var _0x40809f=_0x50ded7;return _0x28bc74(_0x40809f(0x1be),{'p_id':_0x5aca51['id'],'p_auth':_0x5aca51[_0x40809f(0x1fe)],'p_blob':_0x3790a1,'p_saved_at':_0x3a787a['savedAt']});});}function _0x494bb(){var _0x359312=_0x522885;if(_0x4258a8(_0x359312(0x16d))[_0x359312(0x1f3)][_0x359312(0x15d)]('show'))return;_0x28bc74(_0x359312(0x17a),{'p_id':_0x5aca51['id'],'p_auth':_0x5aca51['auth']})[_0x359312(0x176)](function(_0x5bbedd){var _0x584f39=_0x359312;if(_0x5bbedd&&_0x5bbedd[_0x584f39(0x18c)]&&_0x5bbedd[_0x584f39(0x18c)]>_0x5aca51[_0x584f39(0x186)]+0x1f4)return _0x498d40(_0x5aca51[_0x584f39(0x1f8)],_0x5bbedd[_0x584f39(0x166)])[_0x584f39(0x176)](function(_0x5f2dcb){var _0x4095cd=_0x584f39;_0x5aca51[_0x4095cd(0x19a)]=_0x5f2dcb,_0x5aca51['saved']=_0x5bbedd[_0x4095cd(0x18c)],_0x25e4bc(),_0x55170f(_0x4095cd(0x1a4));});})[_0x359312(0x1d4)](function(){});}function _0x554905(){var _0xc209ff=_0x522885;clearInterval(_0x5aca51['poll']),_0x5aca51[_0xc209ff(0x19a)]=null,_0x5aca51['id']=_0x5aca51[_0xc209ff(0x1fe)]=_0x5aca51['key']=null,_0x5aca51[_0xc209ff(0x186)]=0x0,_0x50c2ea[_0xc209ff(0x184)](function(_0x37ee6a){var _0x5b58c3=_0xc209ff;_0x37ee6a[_0x5b58c3(0x162)]='';}),_0x4258a8(_0xc209ff(0x180))[_0xc209ff(0x202)]='',_0x4258a8(_0xc209ff(0x18d))['hidden']=!![],_0x4258a8(_0xc209ff(0x213))[_0xc209ff(0x219)]=![];try{_0x4258a8('open')[_0xc209ff(0x208)]({'behavior':_0xc209ff(0x1d9),'block':'start'});}catch(_0x22ebbc){}}_0x4258a8('kfLock')&&(_0x4258a8(_0x522885(0x1b0))[_0x522885(0x1a5)]=_0x554905),_0x4258a8('kfClear')&&(_0x4258a8(_0x522885(0x1dc))['onclick']=function(){var _0x81a05e=_0x522885;_0x50c2ea[_0x81a05e(0x184)](function(_0x2d13e1){var _0x5715e2=_0x81a05e;_0x2d13e1[_0x5715e2(0x162)]='';}),_0x4258a8(_0x81a05e(0x180))['textContent']='',_0x50c2ea[0x0][_0x81a05e(0x173)]();}),_0x4258a8(_0x522885(0x1f4))&&(_0x4258a8(_0x522885(0x1f4))['onclick']=_0xc9f609);}()));
@@ -845,6 +477,110 @@ function a0_0x3d60(_0x1ef103,_0x204c64){var _0x55e83a=a0_0x55e8();return a0_0x3d
   });
 })();
 
+</script>
+
+<script>
+(function(){
+  var SPHERE_COL="#ffffff";
+  /* ---- theme ---- */
+  function applyTheme(t){
+    document.body.dataset.theme=t;
+    try{localStorage.setItem("kf-theme",t)}catch(e){}
+    var n=document.getElementById("themeName"); if(n) n.textContent=(t==="gold"?"GOLD":"MONO");
+    SPHERE_COL=(t==="gold")?"#f5cf3e":"#ffffff";
+  }
+  var saved="mono"; try{saved=localStorage.getItem("kf-theme")||"mono"}catch(e){}
+  applyTheme(saved==="gold"?"gold":"mono");
+  var tb=document.getElementById("themeBtn");
+  if(tb) tb.onclick=function(){ applyTheme(document.body.dataset.theme==="gold"?"mono":"gold"); };
+
+  /* ---- detected OS label ---- */
+  (function(){
+    var p=(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||"",ua=navigator.userAgent||"",os="macOS";
+    if(/Win/i.test(p)||/Windows/i.test(ua))os="Windows";
+    else if(/Mac/i.test(p)||/Mac OS X/i.test(ua))os="macOS";
+    else if(/Linux/i.test(p)||/Linux/i.test(ua))os="Linux";
+    var el=document.getElementById("detOS"); if(el) el.textContent=os;
+  })();
+
+  /* ---- tabs ---- */
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.onclick=function(){
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on")});
+      t.classList.add("on");
+      var k=t.getAttribute("data-tab");
+      document.querySelectorAll(".panel").forEach(function(p){p.hidden=(p.getAttribute("data-panel")!==k)});
+    };
+  });
+
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+  /* ---- node sphere ---- */
+  (function(){
+    var cv=document.getElementById("sphere"); if(!cv) return;
+    var ctx=cv.getContext("2d"), DPR=Math.min(window.devicePixelRatio||1,2);
+    var N=92, pts=[];
+    for(var i=0;i<N;i++){ var y=1-(i/(N-1))*2, r=Math.sqrt(Math.max(0,1-y*y)), th=i*2.399963229;
+      pts.push([Math.cos(th)*r, y, Math.sin(th)*r]); }
+    var edges=[];
+    for(var a=0;a<N;a++)for(var b=a+1;b<N;b++){
+      var d=pts[a][0]*pts[b][0]+pts[a][1]*pts[b][1]+pts[a][2]*pts[b][2];
+      if(d>0.55) edges.push([a,b]);
+    }
+    var W,H,R,cx,cy;
+    function size(){ var box=cv.getBoundingClientRect();
+      W=cv.width=Math.max(2,box.width*DPR); H=cv.height=Math.max(2,box.height*DPR);
+      cx=W/2; cy=H/2; R=Math.min(W,H)*0.44; }
+    size(); window.addEventListener("resize",size);
+    var ang=0, tilt=0.42, ct=Math.cos(tilt), st=Math.sin(tilt);
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      if(!reduce) ang+=0.0016;
+      var ca=Math.cos(ang), sa=Math.sin(ang), col=SPHERE_COL, proj=new Array(N);
+      for(var i=0;i<N;i++){ var p=pts[i];
+        var x=p[0]*ca - p[2]*sa, z=p[0]*sa + p[2]*ca, y=p[1];
+        var y2=y*ct - z*st, z2=y*st + z*ct;
+        proj[i]=[cx+x*R, cy+y2*R, z2];
+      }
+      ctx.lineWidth=1*DPR; ctx.strokeStyle=col;
+      for(var e=0;e<edges.length;e++){ var A=proj[edges[e][0]], B=proj[edges[e][1]];
+        var al=((A[2]+B[2])/2+1)/2; ctx.globalAlpha=0.07+al*0.42;
+        ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke(); }
+      ctx.shadowBlur=8*DPR; ctx.shadowColor=col; ctx.fillStyle=col;
+      for(var n=0;n<N;n++){ var P=proj[n], al=(P[2]+1)/2;
+        ctx.globalAlpha=0.25+al*0.75;
+        ctx.beginPath();ctx.arc(P[0],P[1],(0.7+al*1.9)*DPR,0,6.2832);ctx.fill(); }
+      ctx.shadowBlur=0; ctx.globalAlpha=1;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ---- matrix rain (gold theme only) ---- */
+  (function(){
+    var cv=document.getElementById("matrix"); if(!cv) return;
+    var ctx=cv.getContext("2d"), DPR=Math.min(window.devicePixelRatio||1,2);
+    var W,H,cols,drops,fs=15;
+    var chars="0123456789ABCDEF<>/\\|{}$#*+=".split("");
+    function size(){ W=cv.width=window.innerWidth*DPR; H=cv.height=window.innerHeight*DPR;
+      cols=Math.max(1,Math.floor(W/(fs*DPR))); drops=[]; for(var i=0;i<cols;i++) drops[i]=Math.random()*-60; }
+    size(); window.addEventListener("resize",size);
+    function frame(){
+      if(document.body.dataset.theme!=="gold" || reduce){ ctx.clearRect(0,0,W,H); requestAnimationFrame(frame); return; }
+      ctx.fillStyle="rgba(6,5,1,0.09)"; ctx.fillRect(0,0,W,H);
+      ctx.font=(fs*DPR)+"px 'IBM Plex Mono',monospace";
+      for(var i=0;i<cols;i++){
+        var ch=chars[(Math.random()*chars.length)|0];
+        var x=i*fs*DPR, y=drops[i]*fs*DPR;
+        ctx.fillStyle="rgba(245,207,62,"+(Math.random()*0.45+0.12)+")";
+        ctx.fillText(ch,x,y);
+        if(y>H && Math.random()>0.975) drops[i]=0; else drops[i]+=0.5;
+      }
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
+})();
 </script>
 </body>
 </html>
