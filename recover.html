@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Open your Keyflow vault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<style>
+  :root{--bg:#000;--card:#111214;--line:#26272b;--mut:#8e8e93;--fg:#f4f4f5;--acc:#30d158;--red:#ff453a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+  h1{font-size:30px;letter-spacing:-.5px;margin:0 0 6px}
+  .sub{color:var(--mut);margin:0 0 28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 14px}
+  @media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}}
+  .w{position:relative}
+  .w .n{position:absolute;top:0;bottom:0;left:10px;display:flex;align-items:center;color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums;pointer-events:none}
+  .w input{width:100%;padding:12px 12px 12px 30px;background:#0b0b0d;border:1px solid var(--line);border-radius:11px;color:var(--fg);font-size:15px;outline:none}
+  .w input:focus{border-color:var(--acc)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:650;cursor:pointer;border-radius:11px;border:1px solid var(--line);padding:12px 18px;background:#fff;color:#000}
+  button.g{background:transparent;color:var(--fg)}
+  button:disabled{opacity:.5;cursor:default}
+  .err{color:var(--red);min-height:20px;margin:10px 0 0;font-size:14px}
+  .note{color:var(--mut);font-size:13px;margin-top:14px}
+  .entry{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid var(--line)}
+  .entry:last-child{border-bottom:none}
+  .av{width:38px;height:38px;border-radius:10px;background:#1c1c20;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--mut);flex:none}
+  .et{min-width:0;flex:1}
+  .et b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .et span{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .cp{background:transparent;border:1px solid var(--line);color:var(--fg);padding:8px 12px;font-size:13px;border-radius:9px}
+  .hidden{display:none}
+  .lock{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--acc);margin-right:7px}
+  a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Open your vault</h1>
+  <p class="sub">Type your 12&#8209;word recovery phrase to see your passwords on any device. Nothing is installed, and the phrase never leaves this page &mdash; it unlocks your vault right here in the browser.</p>
+
+  <div class="card" id="enterCard">
+    <div class="grid" id="grid"></div>
+    <div class="row">
+      <button id="go">Open vault</button>
+      <button class="g" id="clear">Clear</button>
+      <span class="note" style="margin:0">Tip: paste all 12 words into any box at once.</span>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="note">The server only ever holds encrypted data and cannot read your vault. Not case&#8209;sensitive. If you forget the phrase, it cannot be recovered.</div>
+  </div>
+
+  <div class="card hidden" id="vaultCard" style="margin-top:18px">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <div><span class="lock"></span><b id="vcount">0 items</b> <span class="note" id="vwhen"></span></div>
+      <button class="g" id="lockBtn">Lock</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+var SB_URL="https://gvclirykhpwueofpvjeq.supabase.co";
+var SB_KEY="sb_publishable_H1cXgf6C_eD-0kMbkDlB1A_e0NzvT0J";
+var subtle=crypto.subtle, enc=new TextEncoder(), dec=new TextDecoder();
+function cat(a,b){var o=new Uint8Array(a.length+b.length);o.set(a,0);o.set(b,a.length);return o;}
+function hex(u){return Array.prototype.map.call(u,function(x){return ("0"+x.toString(16)).slice(-2);}).join("");}
+function b64(u){var s="";for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);}
+function unb64(s){var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+function derive(phrase){
+  var norm=phrase.toLowerCase().replace(/\s+/g," ").trim();
+  return subtle.importKey("raw",enc.encode(norm),{name:"PBKDF2"},false,["deriveBits"]).then(function(base){
+    return subtle.deriveBits({name:"PBKDF2",salt:enc.encode("keyflow-seed-v1"),iterations:600000,hash:"SHA-256"},base,256);
+  }).then(function(bits){
+    var seed=new Uint8Array(bits);
+    return Promise.all([
+      subtle.digest("SHA-256",cat(seed,enc.encode("id"))),
+      subtle.importKey("raw",seed,{name:"PBKDF2"},false,["deriveBits"]).then(function(k){return subtle.deriveBits({name:"PBKDF2",salt:enc.encode("auth"),iterations:1,hash:"SHA-256"},k,256);}),
+      subtle.digest("SHA-256",cat(seed,enc.encode("enc"))).then(function(r){return subtle.importKey("raw",new Uint8Array(r),{name:"AES-GCM"},false,["decrypt"]);})
+    ]).then(function(a){return {id:hex(new Uint8Array(a[0])),auth:b64(new Uint8Array(a[1])),encKey:a[2]};});
+  });
+}
+function openBlob(key,blob){var p=blob.split("."),iv=unb64(p[0]),ct=unb64(p[1]);
+  return subtle.decrypt({name:"AES-GCM",iv:iv},key,ct).then(function(pt){return JSON.parse(dec.decode(pt));});}
+function rpc(fn,body){
+  return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(body)})
+    .then(function(r){return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null;}catch(e){}
+      if(!r.ok){var m=(j&&(j.message||j.msg))||("HTTP "+r.status);throw new Error(/wrong-details/.test(m)?"wrong-details":m);}return j;});},
+      function(){throw new Error("offline");});
+}
+var G=document.getElementById("grid");
+for(var i=0;i<12;i++){var w=document.createElement("div");w.className="w";
+  w.innerHTML='<span class="n">'+(i+1)+'</span><input autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">';G.appendChild(w);}
+var inputs=[].slice.call(G.querySelectorAll("input"));
+inputs.forEach(function(inp,idx){
+  inp.addEventListener("paste",function(e){
+    var t=(e.clipboardData||window.clipboardData).getData("text")||"";
+    var words=t.trim().split(/\s+/).filter(Boolean);
+    if(words.length>1){e.preventDefault();for(var k=0;k<12;k++)inputs[k].value=(words[k]||"");var n=Math.min(words.length,12);(inputs[n-1]||inputs[11]).focus();}
+  });
+  inp.addEventListener("keydown",function(e){ if(e.key==="Enter") go(); });
+});
+function phraseOf(){return inputs.map(function(i){return i.value.trim();}).filter(Boolean).join(" ");}
+function initial(t){t=(t||"?").trim();return (t[0]||"?").toUpperCase();}
+var E=document.getElementById("err");
+function go(){
+  var phrase=phraseOf(), words=phrase.split(/\s+/).filter(Boolean);
+  E.textContent="";
+  if(words.length<12){E.textContent="Enter all 12 words (you have "+words.length+").";return;}
+  var btn=document.getElementById("go");btn.disabled=true;btn.textContent="Opening…";
+  derive(phrase).then(function(k){
+    return rpc("kf_get",{p_id:k.id,p_auth:k.auth}).then(function(row){
+      if(!row||!row.blob){throw new Error("not-found");}
+      return openBlob(k.encKey,row.blob).then(function(v){ show(v,row.saved_at); });
+    });
+  }).catch(function(e){
+    E.textContent = e.message==="not-found" ? "No vault found for that phrase. Check the words and spelling."
+      : e.message==="wrong-details" ? "That phrase doesn't match a vault."
+      : e.message==="offline" ? "Can't reach the server — check your connection."
+      : "Could not open: "+e.message;
+  }).then(function(){ btn.disabled=false; btn.textContent="Open vault"; });
+}
+function ago(ms){ if(!ms)return ""; var s=(Date.now()-ms)/1000; if(s<90)return "just now"; var m=Math.round(s/60); if(m<90)return m+" min ago"; var h=Math.round(m/60); if(h<36)return h+" h ago"; return Math.round(h/24)+" d ago"; }
+function show(v,when){
+  var ents=(v.entries||v.vault&&v.vault.entries||[]);
+  document.getElementById("enterCard").classList.add("hidden");
+  var card=document.getElementById("vaultCard");card.classList.remove("hidden");
+  document.getElementById("vcount").textContent=ents.length+(ents.length===1?" item":" items");
+  document.getElementById("vwhen").textContent=when?("· saved "+ago(when)):"";
+  var L=document.getElementById("list");L.innerHTML="";
+  if(!ents.length){L.innerHTML='<p class="note">This vault has no entries.</p>';}
+  ents.forEach(function(e){
+    var d=e.data||e; var title=e.title||d.title||"Untitled";
+    var user=d.username||d.email||d.user||d.account||"";
+    var pw=d.password||d.pass||d.secret||d.key||"";
+    var row=document.createElement("div");row.className="entry";
+    var who=user?('<span>'+esc(user)+'</span>'):'';
+    row.innerHTML='<div class="av">'+esc(initial(title))+'</div><div class="et"><b>'+esc(title)+'</b>'+who+'</div>';
+    if(pw){var cp=document.createElement("button");cp.className="cp";cp.textContent="Copy password";
+      cp.onclick=function(){ copy(pw,cp); };row.appendChild(cp);}
+    L.appendChild(row);
+  });
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function copy(t,btn){ (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t):Promise.reject())
+  .then(function(){btn.textContent="Copied";setTimeout(function(){btn.textContent="Copy password";},1400);},
+  function(){ var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");btn.textContent="Copied";}catch(e){}ta.remove();setTimeout(function(){btn.textContent="Copy password";},1400);}); }
+document.getElementById("go").onclick=go;
+document.getElementById("clear").onclick=function(){inputs.forEach(function(i){i.value="";});E.textContent="";inputs[0].focus();};
+document.getElementById("lockBtn").onclick=function(){location.reload();};
+inputs[0].focus();
+window.__kf={derive:derive,phraseOf:phraseOf};
+</script>
+</body>
+</html>
