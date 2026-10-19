@@ -376,15 +376,14 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
   var HEALTH_URL="https://gvclirykhpwueofpvjeq.supabase.co/functions/v1/kf-status";
   var NODES=[
    {city:"Mumbai",region:"ap-south-1",area:"South Asia",flag:"🇮🇳",role:"PRIMARY",x:70.24,y:43.97,live:{conns:13,size:"11 MB",records:5,vaults:0}},
-   {city:"Singapore",region:"ap-southeast-1",area:"Southeast Asia",flag:"🇸🇬",role:"REPLICA",x:78.84,y:57.2,live:{records:0,vaults:0}},
-   {city:"Frankfurt",region:"eu-central-1",area:"Europe",flag:"🇩🇪",role:"REPLICA",x:52.41,y:20.81,live:{records:0,vaults:0}},
-   {city:"London",region:"eu-west-2",area:"Europe",flag:"🇬🇧",role:"REPLICA",x:49.96,y:19.77,live:{records:0,vaults:0}},
-   {city:"N. Virginia",region:"us-east-1",area:"US East",flag:"🇺🇸",role:"REPLICA",x:28.48,y:29.07,live:{records:0,vaults:0}},
-   {city:"N. California",region:"us-west-1",area:"US West",flag:"🇺🇸",role:"REPLICA",x:15.99,y:30.02,live:{records:0,vaults:0}},
    {city:"Tokyo",region:"ap-northeast-1",area:"Northeast Asia",flag:"🇯🇵",role:"REPLICA",x:88.8,y:31.58,live:{records:0,vaults:0}},
-   {city:"Sao Paulo",region:"sa-east-1",area:"South America",flag:"🇧🇷",role:"REPLICA",x:37.05,y:75.78,live:{records:0,vaults:0}}
+   {city:"Tokyo",region:"ap-northeast-1",area:"Northeast Asia",flag:"🇯🇵",role:"REPLICA",x:90.7,y:33.5,live:{records:0,vaults:0}},
+   {city:"Seoul",region:"ap-northeast-2",area:"Northeast Asia",flag:"🇰🇷",role:"REPLICA",x:85.27,y:30.17,live:{records:0,vaults:0}},
+   {city:"Singapore",region:"ap-southeast-1",area:"Southeast Asia",flag:"🇸🇬",role:"REPLICA",x:78.84,y:57.2,live:{records:0,vaults:0}},
+   {city:"Singapore",region:"ap-southeast-1",area:"Southeast Asia",flag:"🇸🇬",role:"REPLICA",x:76.9,y:59.0,live:{records:0,vaults:0}},
+   {city:"Sydney",region:"ap-southeast-2",area:"Oceania",flag:"🇦🇺",role:"REPLICA",x:92.0,y:83.49,live:{records:0,vaults:0}},
+   {city:"Sydney",region:"ap-southeast-2",area:"Oceania",flag:"🇦🇺",role:"REPLICA",x:90.1,y:85.2,live:{records:0,vaults:0}}
   ];
-  var byRegion={}; NODES.forEach(function(n){byRegion[n.region]=n;});
   function stat(n){ var L=n.live||{}; var p=[];
     if(L.conns!=null)p.push(["CONNS",L.conns]);
     if(L.size)p.push(["SIZE",L.size]);
@@ -425,7 +424,7 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
   }
   function pollHealth(){
     fetch(HEALTH_URL,{cache:"no-store"}).then(function(r){return r.ok?r.json():Promise.reject();}).then(function(j){
-      (j.nodes||[]).forEach(function(r){ var n=byRegion[r.region]; if(!n)return;
+      (j.nodes||[]).forEach(function(r,i){ var n=NODES[i]; if(!n)return;
         n.live={conns:r.conns,size:r.size,records:r.records,vaults:r.vaults,postgres:r.postgres,last_write:r.last_write,down:!r.live}; });
       renderNodes();
       var on=document.getElementById("nodesOnline"); if(on)on.textContent=(j.online!=null?j.online:NODES.length)+" / "+(j.total!=null?j.total:NODES.length);
