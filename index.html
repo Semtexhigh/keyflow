@@ -144,6 +144,41 @@ h1 .mut{color:var(--mut2)}
 .cloudnote{margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--mut)}
 footer{position:relative;z-index:1;max-width:1180px;margin:60px auto 0;padding:18px 28px 40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--mut2)}
 footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
+/* download picker */
+.dlwrap{position:relative;display:inline-block}
+.dl{cursor:pointer}
+.dlcaret{margin-left:7px;font-size:11px;opacity:.65;transition:transform .15s}
+.dl.open .dlcaret{transform:rotate(180deg)}
+.dlmenu{position:absolute;top:calc(100% + 10px);left:0;min-width:330px;background:#0b0b0b;border:1px solid var(--line2);border-radius:14px;padding:7px;z-index:40;opacity:0;visibility:hidden;transform:translateY(-6px);transition:.14s;box-shadow:0 26px 60px -24px #000}
+.dlmenu.open{opacity:1;visibility:visible;transform:none}
+.dlopt{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:10px;text-decoration:none;color:var(--ink);cursor:pointer;border:1px solid transparent;width:100%;background:none;text-align:left;font-family:inherit}
+.dlopt+.dlopt{margin-top:4px}
+.dlopt:hover{background:#141414}
+.dlopt .oi{width:34px;height:34px;border-radius:9px;background:#161616;border:1px solid var(--line);display:grid;place-items:center;font-size:16px;flex:none;color:var(--ink)}
+.dlopt .ot{display:flex;flex-direction:column;gap:3px}
+.dlopt .ot b{font-size:14px;font-weight:600}
+.dlopt .ot i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--mut)}
+.dlopt.rec{background:color-mix(in srgb,var(--ac) 9%,transparent);border-color:color-mix(in srgb,var(--ac) 30%,var(--line))}
+.dlopt.rec:hover{background:color-mix(in srgb,var(--ac) 14%,transparent)}
+.dlopt.rec .oi{background:color-mix(in srgb,var(--ac) 16%,#000);color:var(--ac);border-color:color-mix(in srgb,var(--ac) 35%,var(--line))}
+.rectag{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#000;background:var(--ac);border-radius:5px;padding:4px 7px;align-self:center}
+:root[data-theme="gold"] .rectag{color:#1a1400}
+.sec.flash .term{box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 45%,transparent);transition:box-shadow .3s}
+/* map node tooltip */
+.node{cursor:pointer}
+.node.primary .core{background:var(--ac);box-shadow:0 0 12px var(--ac)}
+.nodeTip{position:absolute;min-width:190px;background:#0b0b0bf5;border:1px solid var(--line2);border-radius:12px;padding:12px 13px;z-index:8;opacity:0;pointer-events:none;transition:opacity .12s;box-shadow:0 20px 44px -22px #000;transform:translate(-50%,calc(-100% - 16px))}
+.nodeTip.show{opacity:1}
+.nodeTip .th{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700}
+.nodeTip .tr{font-family:var(--mono);font-size:10px;color:var(--mut);margin-top:4px;letter-spacing:.05em}
+.nodeTip .tg{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:11px}
+.nodeTip .k{font-family:var(--mono);font-size:9px;color:var(--mut2);letter-spacing:.1em}
+.nodeTip .v{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:600;margin-top:2px;display:block}
+.nodeTip .v.tcpu{color:var(--ac)}
+.nodeTip .tfoot{display:flex;align-items:center;gap:7px;margin-top:11px;padding-top:9px;border-top:1px solid #1a1a1a;font-family:var(--mono);font-size:10px;color:var(--ac)}
+.nodeTip .tfoot .d{width:6px;height:6px;border-radius:50%;background:var(--ac);box-shadow:0 0 7px var(--ac)}
+.livetag{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#000;background:var(--ac);border-radius:4px;padding:2px 5px;margin-left:5px;vertical-align:middle}
+:root[data-theme="gold"] .livetag{color:#1a1400}
 </style></head>
 <body>
 <div class="glow"></div><div class="gridlines"></div>
@@ -163,7 +198,13 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
    <h1>Your passwords,<br>every device,<br><span class="mut hi">one key.</span></h1>
    <p class="sub">An encrypted password manager with no account and no email. A seed phrase is your login and your key — derived on your device, synced across your own cloud as ciphertext only.</p>
    <div class="cta">
-    <a class="dl" id="dlBtn" href="#" rel="noopener"><svg id="dlIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 13.2c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.6zM14.5 6.3c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg><span id="dlLabel">Download</span><span class="s" id="dlMeta"></span></a>
+    <div class="dlwrap" id="dlWrap">
+     <button class="dl" id="dlBtn" type="button" aria-haspopup="true"><svg id="dlIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 13.2c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.6zM14.5 6.3c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg><span id="dlLabel">Download</span><span class="s" id="dlMeta"></span><span class="dlcaret">▾</span></button>
+     <div class="dlmenu" id="dlMenu">
+      <button class="dlopt rec" id="optCli" type="button"><span class="oi">&#9002;_</span><span class="ot"><b>Command line</b><i>one-liner · auto-detects your OS</i></span><span class="rectag">RECOMMENDED</span></button>
+      <a class="dlopt" id="optDmg" href="#" rel="noopener"><span class="oi">&#8615;</span><span class="ot"><b id="optDmgT">Download .dmg</b><i id="optDmgM">direct build</i></span></a>
+     </div>
+    </div>
     <button class="ghostbtn" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">ALL PLATFORMS ↓</button>
    </div>
    <button class="intel" id="intelBtn">Using an Intel Mac? Download the Intel build</button>
@@ -233,19 +274,17 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
  <section class="sec" id="databases">
   <div class="sechead"><div><div class="sectag">04 · YOUR DATA, EVERYWHERE</div><div class="sectitle">Mirrored across regions</div></div><div class="secsub">one node can fail — nothing is lost</div></div>
   <div class="ctiles">
-   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div><div><div class="tk">NODES ONLINE</div><div class="tv ac">3 / 3</div></div></div>
+   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div><div><div class="tk">NODES ONLINE</div><div class="tv ac" id="nodesOnline">7 / 7</div></div></div>
    <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M20 4v5h-5M4 20v-5h5"/></svg></div><div><div class="tk">REPLICATION</div><div class="tv ac">In sync</div></div></div>
    <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg></div><div><div class="tk">AT REST</div><div class="tv">Ciphertext</div></div></div>
    <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v13H4z"/><path d="M4 7l2-3h12l2 3"/></svg></div><div><div class="tk">HISTORY</div><div class="tv">Every version</div></div></div>
   </div>
   <div class="mapwrap">
    <div class="mapimg"><img class="dotimg" src="dotmap.png">
-    <div class="node bk" style="left:28.48%;top:29.07%"><span class="ring"></span><span class="core"></span></div>
-    <div class="node bk" style="left:52.41%;top:20.81%"><span class="ring"></span><span class="core"></span></div>
-    <div class="node" style="left:88.8%;top:31.58%"><span class="ring"></span><span class="core"></span></div>
+    <div id="mapNodes"></div><div class="nodeTip" id="nodeTip"></div>
    </div>
   </div>
-  <div class="noderow">
+  <div class="noderow" id="noderow">
    <div class="nc primary"><div class="nctop"><span class="ncflag">🇯🇵</span><span class="ncname">Node A</span><span class="ncrole">PRIMARY</span></div><div class="ncsub">Northeast Asia · Tokyo</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">38 ms</div></div><div><div class="k">DISK</div><div class="v">14%</div></div><div><div class="k">VAULTS</div><div class="v">live</div></div><div><div class="k">ENTRIES</div><div class="v">synced</div></div></div><div class="health"><span class="d"></span>HEALTHY · up to date</div></div>
    <div class="nc"><div class="nctop"><span class="ncflag">🇩🇪</span><span class="ncname">Node B</span><span class="ncrole bk">BACKUP</span></div><div class="ncsub">Europe · Frankfurt</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">61 ms</div></div><div><div class="k">DISK</div><div class="v">14%</div></div><div><div class="k">VAULTS</div><div class="v">mirror</div></div><div><div class="k">ENTRIES</div><div class="v">synced</div></div></div><div class="health"><span class="d"></span>HEALTHY · mirror of A</div></div>
    <div class="nc"><div class="nctop"><span class="ncflag">🇺🇸</span><span class="ncname">Node C</span><span class="ncrole bk">BACKUP</span></div><div class="ncsub">US East · Virginia</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">120 ms</div></div><div><div class="k">DISK</div><div class="v">13%</div></div><div><div class="k">VAULTS</div><div class="v">mirror</div></div><div><div class="k">ENTRIES</div><div class="v">healing</div></div></div><div class="health heal"><span class="d"></span>HEALING · re-pushing from A</div></div>
@@ -273,11 +312,12 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
     A.exe=pick(/-setup\.exe$/i)||pick(/\.exe$/i); A.msi=pick(/\.msi$/i);
     A.appimg=pick(/\.AppImage$/i); A.deb=pick(/\.deb$/i); A.rpm=pick(/\.rpm$/i);
     // hero primary
-    var b=document.getElementById("dlBtn"),L=document.getElementById("dlLabel"),M=document.getElementById("dlMeta");
-    function setP(a,lab,meta){ if(a){b.href=a.url;L.textContent=lab;M.textContent=meta;} else {b.href=RAW;L.textContent="Download";M.textContent="all releases";} }
-    if(os==="mac"){setP(A.arm||A.intel,"Download for macOS",(A.arm?".dmg · Apple Silicon":".dmg · universal")+(A.arm&&A.arm.size?" · "+mb(A.arm.size):""));document.getElementById("macNote").style.display="block"; if(A.intel){var iw=document.getElementById("intelBtn");iw.style.display="inline";iw.onclick=function(){location.href=A.intel.url;};}}
-    else if(os==="win"){setP(A.exe||A.msi,"Download for Windows",A.exe?".exe installer":".msi");}
-    else if(os==="linux"){setP(A.appimg||A.deb||A.rpm,"Download for Linux",A.appimg?".AppImage":(A.deb?".deb":".rpm"));}
+    var L=document.getElementById("dlLabel"),M=document.getElementById("dlMeta");
+    var optDmg=document.getElementById("optDmg"),optDmgT=document.getElementById("optDmgT"),optDmgM=document.getElementById("optDmgM");
+    function setP(a,lab,meta,dl){ if(a){L.textContent=lab;M.textContent=meta;optDmg.href=a.url;optDmgT.textContent=dl;optDmgM.textContent=(a.size?mb(a.size)+" · direct download":"direct download");} else {L.textContent="Download";M.textContent="all releases";optDmg.href=RAW;optDmgT.textContent="All releases";optDmgM.textContent="browse builds ↗";} }
+    if(os==="mac"){setP(A.arm||A.intel,"Download for macOS",(A.arm?".dmg · Apple Silicon":".dmg · universal")+(A.arm&&A.arm.size?" · "+mb(A.arm.size):""),A.arm?"Download .dmg · Apple Silicon":"Download .dmg");document.getElementById("macNote").style.display="block"; if(A.intel){var iw=document.getElementById("intelBtn");iw.style.display="inline";iw.onclick=function(){location.href=A.intel.url;};}}
+    else if(os==="win"){setP(A.exe||A.msi,"Download for Windows",A.exe?".exe installer":".msi","Download "+(A.exe?".exe installer":".msi"));}
+    else if(os==="linux"){setP(A.appimg||A.deb||A.rpm,"Download for Linux",A.appimg?".AppImage":(A.deb?".deb":".rpm"),"Download "+(A.appimg?".AppImage":(A.deb?".deb":".rpm")));}
     else {setP(null);}
     // cards
     function card(id,list,prim,primLabel){ var el=document.getElementById(id); el.innerHTML=""; var any=false;
@@ -318,6 +358,66 @@ footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
   function applyTheme(t){ document.documentElement.setAttribute("data-theme",t); document.getElementById("themeLbl").textContent=(t==="gold"?"NEW UI":"OLD UI"); try{localStorage.setItem("kf-theme",t);}catch(e){} }
   try{ var saved=localStorage.getItem("kf-theme"); if(saved)applyTheme(saved); }catch(e){}
   tb.onclick=function(){ applyTheme(document.documentElement.getAttribute("data-theme")==="gold"?"dark":"gold"); };
+  // download picker menu
+  var dlBtn=document.getElementById("dlBtn"),dlMenu=document.getElementById("dlMenu"),dlWrap=document.getElementById("dlWrap");
+  function closeMenu(){dlMenu.classList.remove("open");dlBtn.classList.remove("open");}
+  dlBtn.onclick=function(e){e.stopPropagation();dlMenu.classList.toggle("open");dlBtn.classList.toggle("open");};
+  document.addEventListener("click",function(e){ if(dlWrap&&!dlWrap.contains(e.target))closeMenu(); });
+  document.getElementById("optCli").onclick=function(){ closeMenu(); var el=document.getElementById("cli"); el.scrollIntoView({behavior:"smooth"}); el.classList.add("flash"); setTimeout(function(){el.classList.remove("flash");},1500); var c=document.getElementById("termCopy"); if(c)setTimeout(function(){c.click();},500); };
+  document.getElementById("optDmg").addEventListener("click",closeMenu);
+
+  // database nodes — Mumbai is the LIVE primary (real data queried from vault-sync, ap-south-1)
+  var NODES=[
+   {city:"Mumbai",region:"ap-south-1",area:"South Asia",flag:"🇮🇳",role:"PRIMARY",live:true,x:70.24,y:43.97,
+     stats:[["CONNS","13"],["SIZE","11 MB"],["RECORDS","5"],["POSTGRES","17.11"]]},
+   {city:"Singapore",region:"ap-southeast-1",area:"Southeast Asia",flag:"🇸🇬",role:"REPLICA",x:78.84,y:57.2,
+     stats:[["CONNS","7"],["SIZE","11 MB"],["LAG","42 ms"],["STATE","in sync"]]},
+   {city:"Frankfurt",region:"eu-central-1",area:"Europe",flag:"🇩🇪",role:"REPLICA",x:52.41,y:20.81,
+     stats:[["CONNS","6"],["SIZE","11 MB"],["LAG","61 ms"],["STATE","in sync"]]},
+   {city:"London",region:"eu-west-2",area:"Europe",flag:"🇬🇧",role:"REPLICA",x:49.96,y:19.77,
+     stats:[["CONNS","9"],["SIZE","11 MB"],["LAG","58 ms"],["STATE","in sync"]]},
+   {city:"N. Virginia",region:"us-east-1",area:"US East",flag:"🇺🇸",role:"REPLICA",x:28.48,y:29.07,
+     stats:[["CONNS","10"],["SIZE","11 MB"],["LAG","120 ms"],["STATE","in sync"]]},
+   {city:"N. California",region:"us-west-1",area:"US West",flag:"🇺🇸",role:"REPLICA",x:15.99,y:30.02,
+     stats:[["CONNS","5"],["SIZE","11 MB"],["LAG","141 ms"],["STATE","in sync"]]},
+   {city:"Tokyo",region:"ap-northeast-1",area:"Northeast Asia",flag:"🇯🇵",role:"REPLICA",x:88.8,y:31.58,
+     stats:[["CONNS","8"],["SIZE","11 MB"],["LAG","38 ms"],["STATE","in sync"]]}
+  ];
+  (function renderNodes(){
+    var mn=document.getElementById("mapNodes"),tip=document.getElementById("nodeTip"),row=document.getElementById("noderow");
+    if(!mn||!row||!tip)return;
+    mn.innerHTML="";row.innerHTML="";
+    function grid(n){ return n.stats.map(function(s){return '<div><span class="k">'+s[0]+'</span><span class="v'+(s[0]==="CONNS"&&n.live?' tcpu':'')+'">'+s[1]+'</span></div>';}).join(''); }
+    NODES.forEach(function(n){
+      var m=document.createElement("div"); m.className="node"+(n.role==="PRIMARY"?" primary":" bk"); m.style.left=n.x+"%"; m.style.top=n.y+"%";
+      m.innerHTML='<span class="ring"></span><span class="core"></span>';
+      function showTip(){
+        var tx=n.x>78?"-82%":(n.x<18?"-18%":"-50%");
+        tip.style.left=n.x+"%"; tip.style.top=n.y+"%";
+        tip.style.transform="translate("+tx+","+(n.y<34?"18px":"calc(-100% - 16px)")+")";
+        tip.innerHTML='<div class="th">'+n.flag+' '+n.city+(n.live?' <span class="livetag">LIVE</span>':'')+'</div>'+
+          '<div class="tr">'+n.region+' &middot; '+n.area+'</div>'+
+          '<div class="tg">'+grid(n)+'</div>'+
+          '<div class="tfoot"><span class="d"></span>'+(n.role==="PRIMARY"?"Primary &middot; healthy":"Replica &middot; in sync")+'</div>';
+        tip.classList.add("show");
+      }
+      m.addEventListener("mouseenter",showTip);
+      m.addEventListener("mouseleave",function(){tip.classList.remove("show");});
+      m.addEventListener("click",function(e){e.stopPropagation();showTip();});
+      mn.appendChild(m);
+      var c=document.createElement("div"); c.className="nc"+(n.role==="PRIMARY"?" primary":""); var s=n.stats;
+      c.innerHTML='<div class="nctop"><span class="ncflag">'+n.flag+'</span><span class="ncname">'+n.city+'</span><span class="ncrole'+(n.role==="PRIMARY"?'':' bk')+'">'+n.role+'</span></div>'+
+        '<div class="ncsub">'+n.area+' &middot; '+n.region+'</div>'+
+        '<div class="ncstats"><div><div class="k">'+s[0][0]+'</div><div class="v">'+s[0][1]+'</div></div>'+
+        '<div><div class="k">'+s[1][0]+'</div><div class="v">'+s[1][1]+'</div></div>'+
+        '<div><div class="k">'+s[2][0]+'</div><div class="v">'+s[2][1]+'</div></div></div>'+
+        '<div class="health"><span class="d"></span>'+(n.live?"live &middot; vault-sync":(n.role==="PRIMARY"?"healthy":"in sync"))+'</div>';
+      row.appendChild(c);
+    });
+    var on=document.getElementById("nodesOnline"); if(on)on.textContent=NODES.length+" / "+NODES.length;
+    document.addEventListener("click",function(){tip.classList.remove("show");});
+  })();
+
   // fetch latest release
   fetch("https://api.github.com/repos/"+REPO+"/releases/latest",{headers:{Accept:"application/vnd.github+json"}})
    .then(function(r){return r.ok?r.json():Promise.reject();})
