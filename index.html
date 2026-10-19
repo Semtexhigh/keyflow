@@ -1,586 +1,167 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!doctype html><html lang="en"><head>
 <meta charset="utf-8">
-<title>KEYFLOW</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Keyflow - your passwords as one encrypted file you own.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyflow — encrypted password manager</title>
+<meta name="description" content="Keyflow — an encrypted password manager. Your passwords across every device, secured by a seed phrase and a key that never leaves your machine. No account, no email.">
 <style>
-/* KEYFLOW HUD console. Black & white by default; a theme switch flips the
-   whole thing to a gold "terminal" with a wireframe node-sphere + matrix
-   rain. One screen: Get / Open-vault are tabs, not a long scroll. */
-:root{color-scheme:dark}
-body{
-  --bg:#000; --fg:#f6f6f6; --dim:#8c8c8c; --faint:#565656;
-  --line:rgba(255,255,255,.16); --line2:rgba(255,255,255,.34);
-  --acc:#ffffff; --glow:rgba(255,255,255,.5); --panel:rgba(255,255,255,.028);
-  --sphere:#ffffff;
-}
-body[data-theme="gold"]{
-  --bg:#060501; --fg:#f6ecc8; --dim:#b39b5a; --faint:#6e5f32;
-  --line:rgba(244,205,66,.24); --line2:rgba(244,205,66,.52);
-  --acc:#f5cf3e; --glow:rgba(245,207,62,.55); --panel:rgba(244,205,66,.05);
-  --sphere:#f5cf3e;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);
-  font:400 14px/1.6 "IBM Plex Mono",ui-monospace,Menlo,monospace;
-  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .5s,color .5s}
-a{color:inherit}
-h1,h2,h3{margin:0;font-family:"Orbitron",sans-serif;font-weight:700;letter-spacing:.02em}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--mono:"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;--sans:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--ok:#3ecf8e;--line:#1e1e1e;--line2:#262626;--mut:#8a8a8a}
+html,body{background:#000;color:#ededed;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;overflow-x:hidden}
+.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1000px 520px at 50% -160px,#161616 0%,#000 58%)}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:28px 28px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:9px;background:#fff;color:#000;display:grid;place-items:center}.logo svg{width:17px;height:17px}
+.wm{font-family:var(--mono);letter-spacing:.34em;font-size:13px;color:#cfcfcf}
+.nav{display:flex;gap:26px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--mut)}
+.nav span::before{content:"◆ ";color:var(--ok)}
+@media(max-width:760px){.nav{display:none}}
+.ver{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line);border-radius:999px;padding:9px 15px}
+main{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;margin-top:52px}
+@media(max-width:900px){main{grid-template-columns:1fr;gap:34px}}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:8px 16px}
+.eyebrow .d{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+h1{font-size:72px;line-height:.98;letter-spacing:-.025em;font-weight:800;margin-top:24px}
+@media(max-width:900px){h1{font-size:54px}}
+h1 .mut{color:#6a6a6a}
+.sub{margin-top:24px;max-width:520px;font-size:17px;line-height:1.65;color:#b4b4b4}
+.cta{display:flex;gap:14px;margin-top:34px;align-items:center;flex-wrap:wrap}
+.dl{display:flex;align-items:center;gap:12px;background:#fff;color:#000;border-radius:14px;padding:16px 26px;font-weight:700;text-decoration:none;font-family:var(--sans);border:none;cursor:pointer}
+.dl:hover{background:#eaeaea}
+.dl svg{width:20px;height:20px}
+.dl .s{font-family:var(--mono);font-size:11px;font-weight:400;color:#444}
+.alt{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line2);border-radius:14px;padding:16px 20px;background:#0c0c0c;cursor:pointer}
+.alt:hover{border-color:#3a3a3a}
+.intel{font-family:var(--mono);font-size:12px;color:var(--mut);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none}
+.intel:hover{color:#cfcfcf}
+.badges{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:8px 14px}
+.badge b{color:#cfcfcf}
+.note{margin-top:22px;max-width:520px;font-family:var(--mono);font-size:11px;line-height:1.7;color:#7a7a7a;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#0a0a0a}
+.note b{color:#cfcfcf}
+.note code{background:#151515;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:#cfcfcf}
+/* preview */
+.preview{border:1px solid var(--line);border-radius:22px;background:#070707;padding:20px;box-shadow:0 50px 100px -40px #000}
+.pbar{display:flex;align-items:center;gap:7px;margin-bottom:16px}
+.pbar i{width:10px;height:10px;border-radius:50%;background:#222}
+.pbar .t{margin-left:12px;font-family:var(--mono);font-size:11px;color:#6a6a6a}
+.mtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mtitle{font-size:20px;font-weight:800;letter-spacing:.08em}
+.cloudchip{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line);background:#0c0c0c;border-radius:999px;padding:6px 11px}
+.cloudchip .d{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok)}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.vc{background:linear-gradient(180deg,#0e0e0e,#080808);border:1px solid var(--line);border-radius:12px;padding:14px;min-height:104px;display:flex;flex-direction:column}
+.vc.hl{border-color:#2f3f38}
+.vc .vi{width:28px;height:28px;border-radius:8px;background:#151515;border:1px solid var(--line2);display:grid;place-items:center;margin-bottom:10px}
+.vc .vi svg{width:14px;height:14px;color:#fff}
+.vc .nm{font-size:15px;font-weight:700}.vc .mt{font-family:var(--mono);font-size:10px;color:var(--mut);margin-top:4px}
+.vc .op{margin-top:auto;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--mut);display:flex;justify-content:space-between;border-top:1px solid #161616;padding-top:8px}
+.vc.add{align-items:center;justify-content:center;border-style:dashed;color:var(--mut);font-family:var(--mono);font-size:10px;letter-spacing:.12em}
+.vc.add .pl{font-size:18px;margin-bottom:5px;font-weight:300}
+footer{position:relative;z-index:1;max-width:1180px;margin:40px auto 0;padding:18px 28px 36px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#5f5f5f}
+footer a{color:#8a8a8a;text-decoration:none}footer a:hover{color:#cfcfcf}
+/* platforms modal */
+.scrim{position:fixed;inset:0;z-index:30;background:#000a;display:none;place-items:center;padding:24px}
+.scrim.open{display:grid}
+.modal{width:100%;max-width:520px;background:linear-gradient(180deg,#0e0e0e,#080808);border:1px solid var(--line);border-radius:18px;padding:24px}
+.modal h3{font-size:19px;font-weight:700}
+.modal .ml{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--mut)}
+.plist{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:#ededed}
+.prow:hover{border-color:#2f3f38}
+.prow .l{font-size:14px}.prow .r{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.closebtn{margin-top:18px;width:100%;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:#cfcfcf;border:1px solid var(--line2);border-radius:12px;padding:12px;background:#0c0c0c;cursor:pointer}
+</style></head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+ <header>
+  <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span class="wm">KEYFLOW</span></div>
+  <div class="nav"><span>SECURE</span><span>CLOUD-SYNCED</span><span>ZERO-KNOWLEDGE</span></div>
+  <span class="ver" id="verChip">latest</span>
+ </header>
+ <main>
+  <section>
+   <div class="eyebrow"><span class="d"></span>AES-256 · ENCRYPTED ON YOUR DEVICE</div>
+   <h1>Your passwords,<br>every device,<br><span class="mut">one key.</span></h1>
+   <p class="sub">An encrypted password manager with no account and no email. A seed phrase is your login and your key — it is derived on your device and the cloud only ever holds ciphertext.</p>
+   <div class="cta">
+    <a class="dl" id="dlBtn" href="#" rel="noopener"><svg id="dlIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 13.2c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.6zM14.5 6.3c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg><span id="dlLabel">Download</span><span class="s" id="dlMeta"></span></a>
+    <button class="alt" id="allBtn">ALL PLATFORMS ↓</button>
+   </div>
+   <div id="intelWrap" style="margin-top:12px;display:none"><button class="intel" id="intelBtn">Using an Intel Mac? Download the Intel build</button></div>
+   <div class="badges"><span class="badge"><b>macOS 11+</b> · Apple Silicon &amp; Intel</span><span class="badge"><b>Windows</b> · Linux</span><span class="badge">cloud sync · <b>recoverable</b></span></div>
+   <div class="note" id="macNote" style="display:none"><b>macOS note:</b> builds are unsigned, so on first launch macOS may say the app is "damaged" or from an unidentified developer. Right-click the app → <b>Open</b> → <b>Open Anyway</b>, or clear the quarantine flag once: <code>xattr -dr com.apple.quarantine /Applications/Keyflow.app</code></div>
+  </section>
+  <section class="preview">
+   <div class="pbar"><i></i><i></i><i></i><span class="t">Keyflow</span></div>
+   <div class="mtop"><div class="mtitle">VAULTS</div><div class="cloudchip"><span class="d"></span>SYNCED</div></div>
+   <div class="vgrid">
+    <div class="vc hl"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18v12H3z"/><path d="M3 7l4-3h6l4 3"/></svg></span><div class="nm">Personal</div><div class="mt">41 items</div><div class="op"><span>AES-256</span><span>open ›</span></div></div>
+    <div class="vc"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v13H4z"/><path d="M9 7V4h6v3"/></svg></span><div class="nm">Work</div><div class="mt">23 items</div><div class="op"><span>AES-256</span><span>open ›</span></div></div>
+    <div class="vc"><span class="vi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span><div class="nm">Crypto</div><div class="mt">9 items</div><div class="op"><span>AES-256</span><span>open ›</span></div></div>
+    <div class="vc add"><div class="pl">+</div>NEW VAULT</div>
+   </div>
+  </section>
+ </main>
+</div>
+<footer>
+ <span>KEYFLOW — ENCRYPTED PASSWORD MANAGER</span>
+ <span>NO ACCOUNT · NO EMAIL · YOU HOLD THE KEY · <a id="relLink" href="https://github.com/Semtexhigh/keyflow/releases" target="_blank" rel="noopener">all releases</a></span>
+</footer>
 
-#matrix{position:fixed;inset:0;z-index:-3;pointer-events:none;opacity:.55}
-#sphere{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);
-  width:min(88vw,740px);height:min(88vw,740px);z-index:-2;pointer-events:none}
-.vign{position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(62% 52% at 50% 43%,transparent 42%,var(--bg) 93%)}
-
-.brk{position:relative}
-.brk::before,.brk::after{content:"";position:absolute;width:13px;height:13px;pointer-events:none}
-.brk::before{top:-1px;left:-1px;border-top:2px solid var(--acc);border-left:2px solid var(--acc)}
-.brk::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--acc);border-right:2px solid var(--acc)}
-
-.hud{min-height:100vh;display:flex;flex-direction:column;max-width:1180px;margin:0 auto;padding:0 clamp(16px,3vw,34px)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 2px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:11px;font-family:"Orbitron";font-weight:900;font-size:16px;letter-spacing:.26em}
-.brand .lg{width:24px;height:24px;border:2px solid var(--acc);border-radius:50%;position:relative;box-shadow:0 0 12px var(--glow)}
-.brand .lg::after{content:"";position:absolute;inset:5px;border:1.5px solid var(--acc);border-radius:50%;opacity:.6}
-.status{display:flex;gap:18px;color:var(--dim);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
-.status span{display:flex;align-items:center;gap:7px;white-space:nowrap}
-.status span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--glow);animation:blink 2.6s infinite}
-@media(max-width:820px){.status{display:none}}
-.themebtn{display:flex;align-items:center;gap:9px;background:transparent;border:1px solid var(--line2);color:var(--fg);
-  font:600 11px/1 "IBM Plex Mono";letter-spacing:.2em;text-transform:uppercase;padding:10px 15px;cursor:pointer;transition:.18s}
-.themebtn:hover{background:var(--acc);color:var(--bg);box-shadow:0 0 20px var(--glow)}
-.themebtn .sw{width:26px;height:14px;border:1px solid currentColor;border-radius:999px;position:relative}
-.themebtn .sw::after{content:"";position:absolute;top:1px;left:1px;width:10px;height:10px;border-radius:50%;background:currentColor;transition:left .2s}
-body[data-theme="gold"] .themebtn .sw::after{left:13px}
-
-.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vw,28px);padding:clamp(22px,5vh,54px) 0}
-.title{text-align:center}
-.title h1{font-size:clamp(44px,9vw,90px);font-weight:900;letter-spacing:.14em;text-shadow:0 0 30px var(--glow)}
-.title .tag{color:var(--dim);font-size:clamp(11px,1.5vw,13.5px);letter-spacing:.22em;text-transform:uppercase;margin-top:10px}
-.title .tag b{color:var(--fg)}
-
-.console{width:min(620px,100%);background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-.tabs{display:flex;border-bottom:1px solid var(--line)}
-.tab{flex:1;background:transparent;border:0;border-right:1px solid var(--line);cursor:pointer;color:var(--dim);
-  font:600 12px/1 "IBM Plex Mono";letter-spacing:.22em;text-transform:uppercase;padding:15px 10px;transition:.16s}
-.tab:last-child{border-right:0}
-.tab:hover{color:var(--fg)}
-.tab.on{background:var(--acc);color:var(--bg)}
-.panel{padding:clamp(20px,3vw,30px)}
-.panel[hidden]{display:none}
-
-.getwrap{display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
-.detected{color:var(--dim);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
-.detected b{color:var(--acc)}
-.get,.cta{font:700 13px/1 "IBM Plex Mono";letter-spacing:.2em;text-transform:uppercase;color:var(--acc);
-  background:transparent;border:1px solid var(--line2);padding:17px 28px;cursor:pointer;position:relative;
-  display:inline-flex;align-items:center;justify-content:center;gap:11px;transition:.18s;text-decoration:none}
-.get:hover,.cta:hover{background:var(--acc);color:var(--bg);box-shadow:0 0 26px var(--glow)}
-.get svg{width:17px;height:17px}
-.subcta{color:var(--faint);font-size:11px;letter-spacing:.12em}
-.subcta a{color:var(--dim);text-underline-offset:3px}
-
-.stats{display:flex;gap:clamp(16px,4vw,44px);flex-wrap:wrap;justify-content:center;color:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-.stats b{color:var(--acc);font-weight:600;text-shadow:0 0 12px var(--glow)}
-.stats span{display:flex;align-items:center;gap:8px}
-.stats span::before{content:"";width:5px;height:5px;background:var(--acc);box-shadow:0 0 8px var(--glow);transform:rotate(45deg)}
-
-.foot{border-top:1px solid var(--line);padding:16px 2px;color:var(--faint);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
-@keyframes blink{0%,70%,100%{opacity:1}82%{opacity:.25}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important}}
-
-/* ---- vault opener (kf*) : HUD terminal style ---- */
-.kfgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-@media(max-width:520px){.kfgrid{grid-template-columns:repeat(3,1fr)}}
-.kfw{position:relative}
-.kfw .kfn{position:absolute;top:0;bottom:0;left:9px;display:flex;align-items:center;color:var(--faint);font-size:10px;pointer-events:none}
-.kfw input{width:100%;padding:12px 8px 12px 24px;background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--fg);
-  font:500 13px/1 "IBM Plex Mono";outline:none;transition:border-color .15s,box-shadow .15s}
-body[data-theme="gold"] .kfw input{background:rgba(244,205,66,.03)}
-.kfw input:focus{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 14px var(--glow)}
-.kfrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
-.kfbtn{padding:15px 26px}
-.kfghost{font:600 12px/1 "IBM Plex Mono";letter-spacing:.16em;text-transform:uppercase;color:var(--fg);
-  background:transparent;border:1px solid var(--line2);padding:13px 20px;cursor:pointer;transition:.16s}
-.kfghost:hover{background:var(--acc);color:var(--bg)}
-.kfnote{font-size:10.5px;color:var(--faint);letter-spacing:.08em}
-.kferr{color:#ff6b6b;min-height:18px;margin-top:12px;font-size:12px;text-align:center}
-body[data-theme="gold"] .kferr{color:#ff8a5c}
-.kfvault{margin-top:4px}
-.kftool{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
-.kfsrch{flex:1;min-width:150px;position:relative}
-.kfsrch input{width:100%;padding:12px 12px 12px 36px;background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--fg);
-  font:400 13px/1 "IBM Plex Mono";outline:none}
-body[data-theme="gold"] .kfsrch input{background:rgba(244,205,66,.03)}
-.kfsrch input:focus{border-color:var(--line2)}
-.kfsrch svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--faint)}
-.kfmeta{display:flex;align-items:center;gap:9px;color:var(--dim);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin:0 2px 14px}
-.kfdot{width:7px;height:7px;background:var(--acc);box-shadow:0 0 8px var(--glow);transform:rotate(45deg)}
-.kflist{display:grid;gap:8px;max-height:42vh;overflow:auto}
-.kfe{background:rgba(255,255,255,.015);border:1px solid var(--line);display:flex;align-items:center;gap:13px;padding:13px 15px;cursor:pointer;
-  transition:.16s;width:100%;text-align:left;color:inherit;font:inherit}
-body[data-theme="gold"] .kfe{background:rgba(244,205,66,.025)}
-.kfe:hover{border-color:var(--line2);box-shadow:0 0 18px -6px var(--glow)}
-.kfav{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font:700 14px/1 "Orbitron";color:var(--bg);flex:0 0 auto;
-  background:var(--acc);box-shadow:0 0 12px var(--glow)}
-.kfet{min-width:0;flex:1}
-.kfet b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kfet span{display:block;color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kfchev{color:var(--faint);flex:0 0 auto;display:flex}
-.kfempty{color:var(--dim);text-align:center;padding:26px 16px;font-size:12px;border:1px dashed var(--line)}
-
-/* ---- shared overlays (kf + dl) ---- */
-.kfov,.dlov{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
-body[data-theme="gold"] .kfov,body[data-theme="gold"] .dlov{background:rgba(6,5,1,.86)}
-.kfov.show,.dlov.show{display:flex}
-.kfsheet,.dlsheet{width:100%;max-width:500px;background:var(--bg);border:1px solid var(--line2);padding:26px;max-height:90vh;overflow:auto;
-  box-shadow:0 0 50px -10px var(--glow);position:relative}
-.kfsheet h3,.dlview h3{font-family:"Orbitron";font-size:20px;letter-spacing:.06em;margin-bottom:4px}
-.kfty{color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:18px}
-.kffld{border:1px solid var(--line);padding:12px 14px;margin-bottom:9px;background:rgba(255,255,255,.015)}
-body[data-theme="gold"] .kffld{background:rgba(244,205,66,.025)}
-.kffld .kfk{color:var(--dim);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
-.kfvrow{display:flex;align-items:center;gap:10px}
-.kfv{flex:1;min-width:0;word-break:break-all;font-size:14px}
-.kfv.mono{font-family:"IBM Plex Mono";letter-spacing:.4px}
-.kfic{background:transparent;border:1px solid var(--line2);color:var(--fg);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;padding:0;transition:.15s}
-.kfic:hover{background:var(--acc);color:var(--bg)}
-.kfic svg{width:15px;height:15px}
-.kfinp{width:100%;padding:12px 13px;background:rgba(255,255,255,.015);border:1px solid var(--line);color:var(--fg);font:400 14px/1 "IBM Plex Mono";outline:none;margin-bottom:9px}
-body[data-theme="gold"] .kfinp{background:rgba(244,205,66,.025)}
-.kfinp:focus{border-color:var(--acc)}
-.kflbl{display:block;color:var(--dim);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin:2px 2px 6px}
-.kffoot{display:flex;gap:10px;margin-top:12px}
-.kffoot>*{flex:1;justify-content:center;text-align:center}
-.kftoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--bg);border:1px solid var(--acc);color:var(--fg);
-  padding:12px 20px;font:600 12px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 0 24px -6px var(--glow)}
-.kftoast.show{opacity:1}
-
-/* ---- download flow (dl*) ---- */
-.dlview .eyebrow,.dlsub{display:block}
-.dlsub{color:var(--dim);font-size:12px;letter-spacing:.06em;margin:4px 0 20px}
-.dlchips{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:20px}
-.dlchip{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;background:rgba(255,255,255,.015);border:1px solid var(--line);
-  padding:14px 15px;cursor:pointer;color:var(--fg);font:inherit;transition:.15s}
-body[data-theme="gold"] .dlchip{background:rgba(244,205,66,.025)}
-.dlchip:hover{border-color:var(--line2)}
-.dlchip.sel{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc),0 0 20px -6px var(--glow)}
-.dlchip b{font-weight:600;font-size:14px}
-.dlchip span{color:var(--dim);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
-.dlbtn{width:100%;justify-content:center}
-.dlmethods{display:grid;gap:11px;margin-bottom:14px}
-.dlm{position:relative;text-align:left;background:rgba(255,255,255,.015);border:1px solid var(--line);padding:18px;cursor:pointer;color:var(--fg);font:inherit;transition:.15s}
-body[data-theme="gold"] .dlm{background:rgba(244,205,66,.025)}
-.dlm:hover{border-color:var(--line2)}
-.dlm b{display:block;font-family:"Orbitron";font-weight:700;font-size:15px;letter-spacing:.04em;margin-bottom:6px}
-.dlm em{position:absolute;top:15px;right:15px;font-style:normal;font:700 9px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;color:var(--bg);padding:5px 9px;background:var(--acc)}
-.dlm span{color:var(--dim);font-size:12px;line-height:1.5;display:block}
-.dllink{background:transparent;border:0;color:var(--dim);font:600 11px/1 "IBM Plex Mono";letter-spacing:.14em;text-transform:uppercase;cursor:pointer;padding:8px 2px;margin-top:2px}
-.dllink:hover{color:var(--fg)}
-.dlsteps{list-style:none;margin:18px 0 8px;padding:0;display:grid;gap:20px}
-.dlsteps>li{display:flex;gap:13px}
-.dlsteps>li>b{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font:700 12px/1 "Orbitron";color:var(--bg);background:var(--acc);box-shadow:0 0 12px var(--glow)}
-.dlsteps>li>div{flex:1;min-width:0}
-.dlsteps p{color:var(--dim);font-size:12px;line-height:1.55;margin-bottom:10px}
-.dlcode{display:flex;align-items:stretch;background:rgba(0,0,0,.5);border:1px solid var(--line2)}
-body[data-theme="gold"] .dlcode{background:rgba(0,0,0,.4)}
-.dlcode code{flex:1;min-width:0;padding:13px 14px;font:500 12px/1.6 "IBM Plex Mono";color:var(--acc);white-space:pre-wrap;word-break:break-all;overflow:auto}
-.dlcopy{flex:0 0 auto;border:0;border-left:1px solid var(--line2);background:transparent;color:var(--fg);font:600 11px/1 "IBM Plex Mono";letter-spacing:.1em;text-transform:uppercase;padding:0 15px;cursor:pointer;transition:.15s}
-.dlcopy:hover{background:var(--acc);color:var(--bg)}
-.dlcopy.done{color:var(--acc)}
-.dlhint{color:var(--faint);font-size:10.5px;line-height:1.55;margin-top:10px;letter-spacing:.04em}
-.dlbar{height:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);overflow:hidden;margin:20px 0 11px;position:relative}
-body[data-theme="gold"] .dlbar{background:rgba(244,205,66,.08)}
-.dlbar i{display:block;height:100%;width:0;background:var(--acc);box-shadow:0 0 14px var(--glow);transition:width .2s ease}
-.dlpct{font:600 13px/1 "IBM Plex Mono";color:var(--acc);letter-spacing:.06em}
-/* eyebrow used inside dl modal */
-.eyebrow{display:inline-block;color:var(--dim);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px}
-</style>
-</head>
-<body data-theme="mono">
-<canvas id="matrix"></canvas>
-<canvas id="sphere"></canvas>
-<div class="vign"></div>
-
-<div class="hud">
-  <header class="bar">
-    <div class="brand"><span class="lg"></span>KEYFLOW</div>
-    <div class="status"><span>SECURE</span><span>OFFLINE-FIRST</span><span>ZERO-KNOWLEDGE</span></div>
-    <button class="themebtn" id="themeBtn"><span class="sw"></span><b id="themeName">MONO</b></button>
-  </header>
-
-  <main class="stage">
-    <div class="title">
-      <h1>KEYFLOW</h1>
-      <p class="tag">Your passwords as <b>one encrypted file you own</b></p>
-    </div>
-
-    <div class="console brk">
-      <div class="tabs">
-        <button class="tab on" data-tab="get">// Get Keyflow</button>
-        <button class="tab" data-tab="vault">// Open Vault</button>
-      </div>
-
-      <div class="panel" data-panel="get">
-        <div class="getwrap">
-          <p class="detected">Detected node &middot; <b id="detOS">macOS</b></p>
-          <a class="get" id="get" href="https://github.com/Semtexhigh/keyflow/releases/latest">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Initialize download
-          </a>
-          <p class="subcta">One-paste install that clears the macOS security flag, or a direct file &mdash; choose in the next step. Free &middot; no account.</p>
-        </div>
-      </div>
-
-      <div class="panel" data-panel="vault" hidden>
-        <div id="kfEnter">
-          <div class="kfgrid" id="kfGrid"></div>
-          <div class="kfrow">
-            <button class="get kfbtn" id="kfGo">Decrypt vault</button>
-            <button class="kfghost" id="kfClear">Clear</button>
-          </div>
-          <p class="kfnote" style="text-align:center;margin-top:12px">Enter your 12-word recovery phrase. Not case-sensitive &middot; paste all 12 at once. The phrase never leaves this page.</p>
-          <div class="kferr" id="kfErr"></div>
-        </div>
-        <div id="kfVault" class="kfvault" hidden>
-          <div class="kftool">
-            <div class="kfsrch">
-              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.4" stroke="currentColor" stroke-width="2"/><path d="m15.8 15.8 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <input id="kfQ" placeholder="Search" autocomplete="off">
-            </div>
-            <button class="kfghost" id="kfAdd">Add</button>
-            <button class="kfghost" id="kfLock">Lock</button>
-          </div>
-          <div class="kfmeta"><span class="kfdot"></span><b id="kfCnt">0</b><span id="kfWhen"></span></div>
-          <div class="kflist" id="kfList"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats">
-      <span><b>AES-256-GCM</b> cipher</span>
-      <span><b>600,000</b> PBKDF2 rounds</span>
-      <span><b>1</b> network host</span>
-    </div>
-  </main>
-
-  <footer class="foot">
-    <span>KEYFLOW &middot; offline encrypted password manager</span>
-    <span>No account &middot; no recovery &middot; you hold the key</span>
-  </footer>
+<div class="scrim" id="scrim">
+ <div class="modal">
+  <h3>All platforms</h3>
+  <div class="ml" id="modalVer">latest release</div>
+  <div class="plist" id="plist"><div class="prow"><span class="l">Loading installers…</span></div></div>
+  <button class="closebtn" id="closeBtn">CLOSE</button>
+ </div>
 </div>
 
-<div class="dlov" id="dlOv"><div class="dlsheet brk" id="dlSheet">
-  <div class="dlview" data-v="device">
-    <span class="eyebrow">Get Keyflow // step 1 of 2</span>
-    <h3>Select machine</h3>
-    <p class="dlsub">We picked the node you're on. Tap another to change it, then continue.</p>
-    <div class="dlchips" id="dlChips"></div>
-    <button class="get dlbtn" id="dlContinue">Continue</button>
-  </div>
-  <div class="dlview" data-v="method" hidden>
-    <span class="eyebrow">Get Keyflow // <span id="dlDevName"></span></span>
-    <h3>Choose method</h3>
-    <div class="dlmethods">
-      <button class="dlm" id="dlCli"><em>Recommended</em><b>Command line</b><span>Downloads and opens Keyflow in one paste, and clears the macOS security flag for you &mdash; no "unidentified developer" prompt.</span></button>
-      <button class="dlm" id="dlApp"><b>Download the app</b><span>Get the installer file and open it yourself, with a live progress bar here.</span></button>
-    </div>
-    <button class="dllink" id="dlBack1">&larr; Back</button>
-  </div>
-  <div class="dlview" data-v="cli" hidden>
-    <span class="eyebrow"><span id="dlCliDev"></span> // command line</span>
-    <h3>Two steps</h3>
-    <ol class="dlsteps">
-      <li><b>1</b><div><p id="dlStep1"></p></div></li>
-      <li><b>2</b><div><p id="dlStep2txt"></p>
-        <div class="dlcode"><code id="dlCmd"></code><button class="dlcopy" id="dlCopy">Copy</button></div>
-        <p class="dlhint" id="dlHint"></p>
-      </div></li>
-    </ol>
-    <button class="dllink" id="dlBack2">&larr; Back</button>
-  </div>
-  <div class="dlview" data-v="dl" hidden>
-    <span class="eyebrow"><span id="dlDlDev"></span></span>
-    <h3 id="dlDlTitle">Downloading</h3>
-    <div class="dlbar"><i id="dlBarFill"></i></div>
-    <p class="dlpct" id="dlPct">Starting</p>
-    <p class="dlhint" id="dlDlHint"></p>
-    <button class="dllink" id="dlBack3">&larr; Back</button>
-  </div>
-</div></div>
-
-<div class="kfov" id="kfOv"><div class="kfsheet brk" id="kfSheet"></div></div>
-<div class="kftoast" id="kfToast"></div>
-
 <script>
-function a0_0x3d60(_0x1ef103,_0x204c64){var _0x55e83a=a0_0x55e8();return a0_0x3d60=function(_0x3d60f8,_0x4a3c2d){_0x3d60f8=_0x3d60f8-0x158;var _0x10988e=_0x55e83a[_0x3d60f8];if(a0_0x3d60['jwgpwy']===undefined){var _0x3c4d60=function(_0x50b459){var _0x1d2f7e='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';var _0x36f32e='',_0x3c5dd1='';for(var _0x45d85d=0x0,_0x4258a8,_0x4c3a95,_0x11a87f=0x0;_0x4c3a95=_0x50b459['charAt'](_0x11a87f++);~_0x4c3a95&&(_0x4258a8=_0x45d85d%0x4?_0x4258a8*0x40+_0x4c3a95:_0x4c3a95,_0x45d85d++%0x4)?_0x36f32e+=String['fromCharCode'](0xff&_0x4258a8>>(-0x2*_0x45d85d&0x6)):0x0){_0x4c3a95=_0x1d2f7e['indexOf'](_0x4c3a95);}for(var _0x419405=0x0,_0x31208e=_0x36f32e['length'];_0x419405<_0x31208e;_0x419405++){_0x3c5dd1+='%'+('00'+_0x36f32e['charCodeAt'](_0x419405)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x3c5dd1);};a0_0x3d60['OTeyYt']=_0x3c4d60,_0x1ef103=arguments,a0_0x3d60['jwgpwy']=!![];}var _0x403af3=_0x55e83a[0x0],_0x101a4e=_0x3d60f8+_0x403af3,_0x161fa8=_0x1ef103[_0x101a4e];return!_0x161fa8?(_0x10988e=a0_0x3d60['OTeyYt'](_0x10988e),_0x1ef103[_0x101a4e]=_0x10988e):_0x10988e=_0x161fa8,_0x10988e;},a0_0x3d60(_0x1ef103,_0x204c64);}function a0_0x55e8(){var _0x3a51e9=['mtbWEa','A2zdBNq','zgvYAxzLqML0CW','DMf1Bhq','zNjVBunOyxjdB2rL','mJuZntiYogDvq0XYAa','zgL2','ChjLDMvUDerLzMf1Bhq','CgXHy2vOB2XKzxi','A2zbzgq','A2zr','A2zNAg9ZDa','zgf0yq','vxbKyxrLza','B25JBgLJAW','zw5J','z2v0rwXLBwvUDej5swq','zgLZywjSzwq','igL0zw0','zw5JCNLWDa','yM9KEq','D3jVBMCTzgv0ywLSCW','yxbWzw5Kq2HPBgq','u0Hblti1nG','A2zSyMW','A2zmB2nR','m0LLrevqzW','ue9tva','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXYzwn0ihG9iJKIihK9iJKIihDPzhrOpsiXmsiGAgvPz2H0psiXmsiGCNG9iJiUnsiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+phbHDgGGzd0IttuGmtvwns41qteUnsaXlJuGmcaWideGnI41idrimtuIihn0CM9Rzt0Iy3vYCMvUDenVBg9YiIbZDhjVA2uTD2LKDgG9iJeUociVpJWVC3zNpG','Bg9NAw4','BwLU','CgfZDgu','DxnLCM5HBwu','zgLNzxn0','r2vUzxjHDgu','y2XPCgjVyxjKrgf0yq','C3bSAxq','BM93','sfruuca','A2zFChv0','Aw1WB3j0s2v5','ig1VBM8','mZu5nJG4vMffwfj6','BM90lwzVDw5K','A2v5zg93BG','BwfW','4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI4OcI','ntuWmZq3m3HwEuXvvG','zw1HAwW','DxnLCG','zxHLy0nVBw1HBMq','A2zLBxb0Eq','qujdrevgr0Hks0XntLbruLnuvvzxwfLAywjJzgvMz2HPAMTTBNbXCNn0Dxz3EhL6mJm0nty3odKHqcmKjsyQpW','mJbJzM1iyvu','A2zmAxn0','v2vIC2L0zq','A2zHDG','C2v0','Ahr0Chm6lY9NDMnSAxj5A2HWD3vLB2zWDMPLCs5ZDxbHyMfZzs5JBW','A2zLCNi','u2f2Aw5N4OcM','y2f0y2G','q29WEq','C3rVCfbYB3bHz2f0Aw9U','y2XHC3noyw1L','A2zuB2fZDa','C21VB3rO','WRCGC2f2zwqG','pc9ZCgfUpJXPBNb1DcbHDxrVy29TCgXLDgu9iM9MzIiGyxv0B2nHCgL0ywXPEMu9iM9MzIiGyxv0B2nVCNjLy3q9iM9MzIiGC3bLBgXJAgvJAZ0IzMfSC2uIpG','A2zdBgvHCG','yxbWBgLJyxrPB24VANnVBG','mJyZovv0wuX1sa','A2zMBgq','vxnLCM5HBwuGlYbLBwfPBa','rw50CNKGywrKzwq','tM8GDMf1BhqGzM91BMqGzM9YihrOyxqGCgHYyxnLlIbdAgvJAYb0AguGD29YzhmU','igL0zw1Z','A2z0Eq','zMLSDgvY','zgvJB2rL','Cg9PBNrLCG','CM91BMq','quvtluDdtq','A2zMB290','BwvZC2fNzq','D3jPDgvuzxH0','CgfZCW','BM90zxm','C2jFChvIBgLZAgfIBgvFsdfJwgDMnKnFzuqTmgTnyMTeBeiXqv9Lme56DLqWsG','mZe4DvvUEgrt','z2v0uMfUzg9TvMfSDwvZ','uejlreyY','y2XHC3nmAxn0','A2zhBW','z2v0igTMyNrU','igqGywDV','mtKZoufJz05PCG','A2v5','q291BgqGBM90ihnHDMu6ia','q2fU4OczDcbYzwfJAcb0AguGC2vYDMvYiokaLcbJAgvJAYb5B3vYignVBM5Ly3rPB24U','C2vSzwn0','A2ztAgvLDa','A2zJAgv2','yxv0Aa','r2L2zsbPDcbHDcbSzwfZDcbHihrPDgXLig9YigeGCgfZC3DVCMqU','AM9PBG','ywnJB3vUDa','Dgv4DenVBNrLBNq','mtiWAgXArxfi','vgL0Bgu','BxnN','C2XPy2u','CMvTB3zL','C2nYB2XSsw50B1zPzxC','mti1odq0meH1zwPMCW','C2HVDW','Dgv4Da','ugfZC3DVCMq','Dgv4DgfYzwe','mtuYnKz6vKrhvG','zgvJCNLWDa','y3vYC29Y','ywXS','CMvWBgfJzq','A2zfBNrLCG','CMf3','C3r5Bgu','ywrKrxzLBNrmAxn0zw5LCG','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXWyxrOigq9iK0XmIaZDJrnmtiGmtD2ne0ZideYAdrnmtCGmtjOne01lJyGns42BdiUocaYlJHnmtuUnIaXns42BdiUocaYlJHnmtGUnca1lJzSltiUocaYlJHnoc40ide1lJzSltiUocaYlJGIihn0CM9Rzt0Iy3vYCMvUDenVBg9YiIbZDhjVA2uTD2LKDgG9iJeUociGC3rYB2TLlwXPBMvJyxa9iNjVDw5KiI8+pc9ZDMC+','DgL0Bgu','AgLKzgvU','uMv2zwfS','tM8GBwf0y2HLCY4','yNv0Dg9U','A2zxAgvU','C2L0zq','C2f2zwrbDa','y29UDgfPBNm','q2fUy2vS','tM90zxm','B2zMBgLUzq','DhLWzq','DMfSDwu','Dg9mB3DLCKnHC2u','u2f2zq','tMv3igvUDhj5','yMXVyG','BwfYz2LUqM90Dg9T','rw50zxiGywXSideYihDVCMrZicH5B3uGAgf2zsa','DxjS','phn2zYb3Awr0Ad0ImtGIigHLAwDODd0ImtGIihzPzxDcB3G9iJaGmcaYncaYnciGzMLSBd0IBM9Uzsi+phbHDgGGzd0IBtKGnIa2idyTnIa2iIbZDhjVA2u9iMn1CNjLBNrdB2XVCIiGC3rYB2TLlxDPzhrOpsiYiIbZDhjVA2uTBgLUzwnHCd0ICM91BMqIlZ48l3n2zZ4','vgHPCYb2yxvSDcbOyxmGBM8Gzw50CMLLCYb5zxqUifvZzsbbzgqGDg8Gy3jLyxrLig9Uzs4','nJG0mZvyyxDxCKO','A2zpDG','zw50CMLLCW','q29WAwvK','vw50AxrSzwq','BgfIzwW','zs5NlIbhBwfPBa','zM9JDxm','Dw5ZAgLMDa','ywrK','DgHLBG','BgvUz3rO','C3rYAw5NAwz5','Dg9tDhjPBMC','A2zFz2v0','ig1PBIbHz28','D2vIC2L0zq','y29WEq','A2z2','A2zPBNa','A2zfCNi','Cg9SBa','mtmYwKjSt0nl','mZC4mtu0uLLyD1zU','zM9YrwfJAa','Aw5WDxq','C2f2zwq','y2fSBa','zw5JB2rL','phn2zYb2Awv3qM94psiWidaGmJqGmJqIigzPBgW9iM5VBMuIpJXWyxrOigq9iK0YideYCZmUns03ideWltCGmtaGnYaXmca3ltmUnsa3lteWidDtmIaXmIaYideYwIiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+pgnPCMnSzsbJEd0ImtiIign5psiXmIiGCJ0ImYiGC3rYB2TLpsjJDxjYzw50q29SB3iIihn0CM9Rzs13Awr0Ad0Ims44iI8+pc9ZDMC+','q2XVC2u','y2XPCgjVyxjK','C2f2zwrFyxq','A2zwyxvSDa','C3vIDgXL','l3jLC3qVDJeVCNbJlW','Aw5Uzxjive1m','BM90zq','A2zPyW','CgfYC2u','CgfZC3DVCMq','y2XPy2S','DhjPBq'];a0_0x55e8=function(){return _0x3a51e9;};return a0_0x55e8();}(function(_0x53733b,_0x2e33c1){var _0x1bebfd=a0_0x3d60,_0x32569d=_0x53733b();while(!![]){try{var _0x24d497=-parseInt(_0x1bebfd(0x1f7))/0x1*(-parseInt(_0x1bebfd(0x20e))/0x2)+-parseInt(_0x1bebfd(0x1b1))/0x3*(-parseInt(_0x1bebfd(0x19c))/0x4)+-parseInt(_0x1bebfd(0x16c))/0x5*(-parseInt(_0x1bebfd(0x1f0))/0x6)+-parseInt(_0x1bebfd(0x183))/0x7*(-parseInt(_0x1bebfd(0x203))/0x8)+-parseInt(_0x1bebfd(0x1c6))/0x9*(-parseInt(_0x1bebfd(0x1cc))/0xa)+-parseInt(_0x1bebfd(0x182))/0xb*(-parseInt(_0x1bebfd(0x209))/0xc)+-parseInt(_0x1bebfd(0x1de))/0xd*(parseInt(_0x1bebfd(0x1c1))/0xe);if(_0x24d497===_0x2e33c1)break;else _0x32569d['push'](_0x32569d['shift']());}catch(_0x300e13){_0x32569d['push'](_0x32569d['shift']());}}}(a0_0x55e8,0xdf613),(function(){var _0x522885=a0_0x3d60,_0x50b459=_0x522885(0x1d1),_0x1d2f7e=_0x522885(0x1ef),_0x36f32e=crypto[_0x522885(0x18e)],_0x3c5dd1=new TextEncoder(),_0x45d85d=new TextDecoder();function _0x4258a8(_0x32ddcb){var _0x2436c8=_0x522885;return document[_0x2436c8(0x1a7)](_0x32ddcb);}function _0x4c3a95(_0x24635e,_0x1d2314,_0x418a9b){var _0x34cd19=_0x522885,_0x44e0a4=document['createElement'](_0x24635e);if(_0x1d2314)_0x44e0a4[_0x34cd19(0x1d7)]=_0x1d2314;if(_0x418a9b!=null)_0x44e0a4[_0x34cd19(0x202)]=_0x418a9b;return _0x44e0a4;}function _0x11a87f(_0x46a05d,_0x355446){var _0x1488fb=_0x522885,_0x1d4980=new Uint8Array(_0x46a05d[_0x1488fb(0x177)]+_0x355446['length']);return _0x1d4980[_0x1488fb(0x1d0)](_0x46a05d,0x0),_0x1d4980['set'](_0x355446,_0x46a05d['length']),_0x1d4980;}function _0x419405(_0x5bbe50){var _0x3751ba=_0x522885;return Array['prototype'][_0x3751ba(0x1c4)][_0x3751ba(0x187)](_0x5bbe50,function(_0x18ee77){return('0'+_0x18ee77['toString'](0x10))['slice'](-0x2);})[_0x3751ba(0x200)]('');}function _0x31208e(_0x45cb31){var _0x3dc044=_0x522885,_0x411a97='';for(var _0x5f0145=0x0;_0x5f0145<_0x45cb31[_0x3dc044(0x177)];_0x5f0145++)_0x411a97+=String[_0x3dc044(0x19b)](_0x45cb31[_0x5f0145]);return btoa(_0x411a97);}function _0x306383(_0x596cc9){var _0x7d879d=_0x522885,_0x15fd37=atob(_0x596cc9),_0x207c09=new Uint8Array(_0x15fd37['length']);for(var _0x2d12df=0x0;_0x2d12df<_0x15fd37[_0x7d879d(0x177)];_0x2d12df++)_0x207c09[_0x2d12df]=_0x15fd37['charCodeAt'](_0x2d12df);return _0x207c09;}function _0x10e473(){var _0x3ce36b=_0x522885;return Date['now']()[_0x3ce36b(0x179)](0x24)+Math['random']()[_0x3ce36b(0x179)](0x24)[_0x3ce36b(0x206)](0x2,0x8);}var _0x5aca51={'id':null,'auth':null,'key':null,'vault':null,'saved':0x0,'poll':null};function _0x3dd28f(_0x2d4aa2){var _0x4f7857=_0x522885,_0x3084fd=_0x2d4aa2['toLowerCase']()[_0x4f7857(0x212)](/\s+/g,'\x20')[_0x4f7857(0x196)]();return _0x36f32e[_0x4f7857(0x1bf)](_0x4f7857(0x214),_0x3c5dd1['encode'](_0x3084fd),{'name':'PBKDF2'},![],[_0x4f7857(0x199)])[_0x4f7857(0x176)](function(_0x3930f3){var _0x10b292=_0x4f7857;return _0x36f32e['deriveBits']({'name':_0x10b292(0x1f2),'salt':_0x3c5dd1['encode']('keyflow-seed-v1'),'iterations':0x927c0,'hash':_0x10b292(0x1ae)},_0x3930f3,0x100);})['then'](function(_0x5b74a4){var _0x48ed78=_0x4f7857,_0x39ca7b=new Uint8Array(_0x5b74a4);return Promise[_0x48ed78(0x211)]([_0x36f32e[_0x48ed78(0x1b8)]('SHA-256',_0x11a87f(_0x39ca7b,_0x3c5dd1[_0x48ed78(0x188)]('id'))),_0x36f32e[_0x48ed78(0x1bf)](_0x48ed78(0x214),_0x39ca7b,{'name':_0x48ed78(0x1f2)},![],['deriveBits'])[_0x48ed78(0x176)](function(_0x54f15b){var _0x3d00c3=_0x48ed78;return _0x36f32e[_0x3d00c3(0x199)]({'name':_0x3d00c3(0x1f2),'salt':_0x3c5dd1[_0x3d00c3(0x188)](_0x3d00c3(0x1fe)),'iterations':0x1,'hash':'SHA-256'},_0x54f15b,0x100);}),_0x36f32e['digest'](_0x48ed78(0x1ae),_0x11a87f(_0x39ca7b,_0x3c5dd1[_0x48ed78(0x188)](_0x48ed78(0x1a6))))['then'](function(_0x407994){var _0x297fb9=_0x48ed78;return _0x36f32e[_0x297fb9(0x1bf)]('raw',new Uint8Array(_0x407994),{'name':'AES-GCM'},![],[_0x297fb9(0x1aa),_0x297fb9(0x20f)]);})])[_0x48ed78(0x176)](function(_0x17ebe5){return{'id':_0x419405(new Uint8Array(_0x17ebe5[0x0])),'auth':_0x31208e(new Uint8Array(_0x17ebe5[0x1])),'key':_0x17ebe5[0x2]};});});}function _0x4faa0d(_0x1d797b,_0x1a909a){var _0x597b76=_0x522885,_0x14e8d0=crypto['getRandomValues'](new Uint8Array(0xc));return _0x36f32e[_0x597b76(0x1aa)]({'name':_0x597b76(0x1e9),'iv':_0x14e8d0},_0x1d797b,_0x3c5dd1[_0x597b76(0x188)](JSON[_0x597b76(0x178)](_0x1a909a)))[_0x597b76(0x176)](function(_0x5d1373){return _0x31208e(_0x14e8d0)+'.'+_0x31208e(new Uint8Array(_0x5d1373));});}function _0x498d40(_0x219ac0,_0x348621){var _0x472cb7=_0x522885,_0x546ff7=_0x348621[_0x472cb7(0x1bb)]('.'),_0x1dcd70=_0x306383(_0x546ff7[0x0]),_0x1f12f5=_0x306383(_0x546ff7[0x1]);return _0x36f32e[_0x472cb7(0x20f)]({'name':_0x472cb7(0x1e9),'iv':_0x1dcd70},_0x219ac0,_0x1f12f5)['then'](function(_0xa3e849){var _0x223646=_0x472cb7;return JSON['parse'](_0x45d85d[_0x223646(0x1e6)](_0xa3e849));});}function _0x28bc74(_0xf8aeda,_0x31cae2){var _0x17f191=_0x522885;return fetch(_0x50b459+_0x17f191(0x18f)+_0xf8aeda,{'method':_0x17f191(0x1b2),'headers':{'apikey':_0x1d2f7e,'Authorization':'Bearer\x20'+_0x1d2f7e,'Content-Type':_0x17f191(0x1dd)},'body':JSON[_0x17f191(0x178)](_0x31cae2)})['then'](function(_0x5e568d){var _0x149cc6=_0x17f191;return _0x5e568d[_0x149cc6(0x20b)]()[_0x149cc6(0x176)](function(_0x41e8e7){var _0x569fed=_0x149cc6,_0x1887f8=null;try{_0x1887f8=_0x41e8e7?JSON[_0x569fed(0x193)](_0x41e8e7):null;}catch(_0xb5feec){}if(!_0x5e568d['ok']){var _0x58495e=_0x1887f8&&(_0x1887f8['message']||_0x1887f8[_0x569fed(0x205)])||_0x569fed(0x1bd)+_0x5e568d['status'];throw new Error(/wrong-details/['test'](_0x58495e)?_0x569fed(0x1ac):_0x58495e);}return _0x1887f8;});},function(){var _0x3c74a4=_0x17f191;throw new Error(_0x3c74a4(0x160));});}var _0x54057b=_0x4258a8(_0x522885(0x1d8)),_0x2931b0;function _0x55170f(_0x9b6e7d){var _0xfc3e6f=_0x522885;if(!_0x54057b)return;_0x54057b[_0xfc3e6f(0x202)]=_0x9b6e7d,_0x54057b['classList'][_0xfc3e6f(0x175)]('show'),clearTimeout(_0x2931b0),_0x2931b0=setTimeout(function(){var _0x4056f7=_0xfc3e6f;_0x54057b[_0x4056f7(0x1f3)]['remove'](_0x4056f7(0x20a));},0x640);}function _0x31c134(_0x2f876c){var _0x26773f=_0x522885;return(navigator['clipboard']&&navigator[_0x26773f(0x18b)][_0x26773f(0x1ec)]?navigator['clipboard'][_0x26773f(0x1ec)](_0x2f876c):Promise['reject']())[_0x26773f(0x1d4)](function(){var _0x365f12=_0x26773f,_0x169f45=_0x4c3a95(_0x365f12(0x20d));_0x169f45[_0x365f12(0x162)]=_0x2f876c,_0x169f45['style']['cssText']='position:fixed;top:-1000px',document[_0x365f12(0x1ab)][_0x365f12(0x1ad)](_0x169f45),_0x169f45[_0x365f12(0x1fb)]();try{document[_0x365f12(0x1c9)](_0x365f12(0x17d));}catch(_0x3dda35){}_0x169f45[_0x365f12(0x207)]();})[_0x26773f(0x176)](function(){var _0x521e37=_0x26773f;_0x55170f(_0x521e37(0x16f));});}var _0x3972ce=_0x4258a8('kfGrid'),_0x50c2ea=[];if(_0x3972ce){for(var _0x378ae8=0x0;_0x378ae8<0xc;_0x378ae8++){var _0x257958=_0x4c3a95(_0x522885(0x19d),'kfw');_0x257958[_0x522885(0x190)]='<span\x20class=\x22kfn\x22>'+(_0x378ae8+0x1)+_0x522885(0x1db),_0x3972ce[_0x522885(0x1ad)](_0x257958);}_0x50c2ea=[]['slice'][_0x522885(0x187)](_0x3972ce['querySelectorAll']('input')),_0x50c2ea[_0x522885(0x184)](function(_0xfe0f97,_0x2f68af){var _0x53e2bb=_0x522885;_0xfe0f97[_0x53e2bb(0x216)](_0x53e2bb(0x1b6),function(_0xf66024){var _0x4a05f4=_0x53e2bb,_0x5c03dc=(_0xf66024[_0x4a05f4(0x1ba)]||window[_0x4a05f4(0x1ba)])['getData'](_0x4a05f4(0x20b))||'',_0x1c2615=_0x5c03dc[_0x4a05f4(0x196)]()[_0x4a05f4(0x1bb)](/\s+/)[_0x4a05f4(0x1e5)](Boolean);if(_0x1c2615[_0x4a05f4(0x177)]>0x1){_0xf66024[_0x4a05f4(0x19e)]();for(var _0x41cb53=0x0;_0x41cb53<0xc;_0x41cb53++)_0x50c2ea[_0x41cb53][_0x4a05f4(0x162)]=_0x1c2615[_0x41cb53]||'';(_0x50c2ea[Math[_0x4a05f4(0x1b5)](_0x1c2615[_0x4a05f4(0x177)],0xc)-0x1]||_0x50c2ea[0xb])[_0x4a05f4(0x173)]();}}),_0xfe0f97[_0x53e2bb(0x216)](_0x53e2bb(0x1c3),function(_0x1c9a06){var _0x1dde2e=_0x53e2bb;if(_0x1c9a06[_0x1dde2e(0x1f8)]==='Enter')_0xc9f609();_0x1c9a06[_0x1dde2e(0x1f8)]==='\x20'&&(_0x1c9a06['preventDefault'](),(_0x50c2ea[_0x2f68af+0x1]||_0xfe0f97)[_0x1dde2e(0x173)]());});});}function _0x3d6893(){var _0x13b57a=_0x522885;return _0x50c2ea[_0x13b57a(0x1c4)](function(_0x5f282a){var _0x302a52=_0x13b57a;return _0x5f282a[_0x302a52(0x162)][_0x302a52(0x196)]();})[_0x13b57a(0x1e5)](Boolean)[_0x13b57a(0x200)]('\x20');}function _0xc9f609(){var _0x9f03b0=_0x522885,_0x2de901=_0x3d6893(),_0x53f27c=_0x2de901[_0x9f03b0(0x1bb)](/\s+/)[_0x9f03b0(0x1e5)](Boolean);_0x4258a8(_0x9f03b0(0x180))[_0x9f03b0(0x202)]='';if(_0x53f27c['length']<0xc){_0x4258a8(_0x9f03b0(0x180))[_0x9f03b0(0x202)]=_0x9f03b0(0x168)+_0x53f27c[_0x9f03b0(0x177)]+').';return;}var _0x609196=_0x4258a8(_0x9f03b0(0x1f4));_0x609196[_0x9f03b0(0x1a8)]=!![];var _0x35cc80=_0x609196[_0x9f03b0(0x202)];_0x609196['textContent']='Opening…',_0x3dd28f(_0x2de901)[_0x9f03b0(0x176)](function(_0x2013c8){var _0xe720b4=_0x9f03b0;return _0x5aca51['id']=_0x2013c8['id'],_0x5aca51[_0xe720b4(0x1fe)]=_0x2013c8[_0xe720b4(0x1fe)],_0x5aca51[_0xe720b4(0x1f8)]=_0x2013c8[_0xe720b4(0x1f8)],_0x28bc74(_0xe720b4(0x17a),{'p_id':_0x2013c8['id'],'p_auth':_0x2013c8[_0xe720b4(0x1fe)]})[_0xe720b4(0x176)](function(_0x532e28){var _0x57da52=_0xe720b4;if(!_0x532e28||!_0x532e28[_0x57da52(0x166)])throw new Error(_0x57da52(0x1c2));return _0x498d40(_0x2013c8[_0x57da52(0x1f8)],_0x532e28['blob'])[_0x57da52(0x176)](function(_0x1da1d2){var _0x3687eb=_0x57da52;_0x5aca51[_0x3687eb(0x19a)]=_0x1da1d2,_0x5aca51['saved']=_0x532e28[_0x3687eb(0x18c)]||0x0,_0x2917a3();});});})[_0x9f03b0(0x1d4)](function(_0x15a8ec){var _0x5882a0=_0x9f03b0;_0x4258a8(_0x5882a0(0x180))[_0x5882a0(0x202)]=_0x15a8ec['message']===_0x5882a0(0x1c2)?_0x5882a0(0x1e2):_0x15a8ec[_0x5882a0(0x1eb)]===_0x5882a0(0x1ac)?'That\x20phrase\x20doesn’t\x20match\x20a\x20vault.':_0x15a8ec[_0x5882a0(0x1eb)]===_0x5882a0(0x160)?_0x5882a0(0x1fa):'Could\x20not\x20open:\x20'+_0x15a8ec[_0x5882a0(0x1eb)];})[_0x9f03b0(0x176)](function(){var _0x42d22b=_0x9f03b0;_0x609196[_0x42d22b(0x1a8)]=![],_0x609196[_0x42d22b(0x202)]=_0x35cc80;});}function _0x107d6e(){var _0x2e06a8=_0x522885,_0x122e05=_0x5aca51[_0x2e06a8(0x19a)]||{};return _0x122e05[_0x2e06a8(0x16e)]||_0x122e05[_0x2e06a8(0x19a)]&&_0x122e05[_0x2e06a8(0x19a)][_0x2e06a8(0x16e)]||[];}function _0x245163(_0x59248e){var _0x3fa9f2=_0x522885,_0x52793c=_0x5aca51['vault']||(_0x5aca51[_0x3fa9f2(0x19a)]={});if(_0x52793c['vault']&&_0x52793c[_0x3fa9f2(0x19a)][_0x3fa9f2(0x16e)])_0x52793c['vault'][_0x3fa9f2(0x16e)]=_0x59248e;else _0x52793c['entries']=_0x59248e;}function _0x1d3f05(_0x338f38){var _0x31330f=_0x522885;if(!_0x338f38)return'';var _0x4079e6=(Date['now']()-_0x338f38)/0x3e8;if(_0x4079e6<0x4b)return'just\x20now';var _0x1596b3=Math[_0x31330f(0x1e8)](_0x4079e6/0x3c);if(_0x1596b3<0x4b)return _0x1596b3+_0x31330f(0x17b);var _0x2a0655=Math[_0x31330f(0x1e8)](_0x1596b3/0x3c);if(_0x2a0655<0x28)return _0x2a0655+'\x20h\x20ago';return Math[_0x31330f(0x1e8)](_0x2a0655/0x18)+_0x31330f(0x1f6);}function _0x2917a3(){var _0x818837=_0x522885;_0x4258a8(_0x818837(0x213))['hidden']=!![],_0x4258a8(_0x818837(0x18d))[_0x818837(0x219)]=![],_0x25e4bc();try{_0x4258a8('open')['scrollIntoView']({'behavior':_0x818837(0x1d9),'block':'start'});}catch(_0x16ef3d){}clearInterval(_0x5aca51[_0x818837(0x181)]),_0x5aca51[_0x818837(0x181)]=setInterval(_0x494bb,0xfa0);}function _0x3bdd05(_0x716c40){var _0x39d351=_0x522885,_0x33de43=_0x716c40[_0x39d351(0x1a3)]||_0x716c40;return{'user':_0x33de43[_0x39d351(0x1b7)]||_0x33de43[_0x39d351(0x1c7)]||_0x33de43[_0x39d351(0x1c8)]||_0x33de43[_0x39d351(0x201)]||'','pass':_0x33de43[_0x39d351(0x194)]||_0x33de43[_0x39d351(0x1ed)]||_0x33de43['secret']||_0x33de43['key']||'','url':_0x33de43['url']||_0x33de43[_0x39d351(0x15b)]||_0x33de43[_0x39d351(0x17c)]||'','note':_0x33de43[_0x39d351(0x191)]||_0x33de43[_0x39d351(0x1ee)]||''};}function _0x25e4bc(){var _0x873fc8=_0x522885,_0x35dfb6=(_0x4258a8(_0x873fc8(0x1a1))[_0x873fc8(0x162)]||'')['toLowerCase'](),_0x47082d=_0x107d6e();_0x4258a8(_0x873fc8(0x198))[_0x873fc8(0x202)]=_0x47082d[_0x873fc8(0x177)]+(_0x47082d[_0x873fc8(0x177)]===0x1?_0x873fc8(0x1a9):_0x873fc8(0x1e3)),_0x4258a8(_0x873fc8(0x15a))[_0x873fc8(0x202)]=_0x5aca51[_0x873fc8(0x186)]?_0x873fc8(0x1da)+_0x1d3f05(_0x5aca51[_0x873fc8(0x186)]):'';var _0x3d00f8=_0x4258a8(_0x873fc8(0x1cd));_0x3d00f8[_0x873fc8(0x190)]='';var _0x411136=_0x47082d[_0x873fc8(0x1e5)](function(_0xdccb48){var _0x257851=_0x873fc8;if(!_0x35dfb6)return!![];var _0x3d1767=_0x3bdd05(_0xdccb48);return((_0xdccb48[_0x257851(0x218)]||'')+'\x20'+_0x3d1767['user']+'\x20'+_0x3d1767[_0x257851(0x169)])[_0x257851(0x163)]()['indexOf'](_0x35dfb6)>=0x0;});if(!_0x411136[_0x873fc8(0x177)]){_0x3d00f8[_0x873fc8(0x1ad)](_0x4c3a95(_0x873fc8(0x19d),_0x873fc8(0x1ca),_0x47082d[_0x873fc8(0x177)]?_0x873fc8(0x158):_0x873fc8(0x16b)));return;}_0x411136[_0x873fc8(0x184)](function(_0x4d93f8){var _0x29c42d=_0x873fc8,_0x56c502=_0x3bdd05(_0x4d93f8),_0x2d7f41=_0x4c3a95('button','kfe'),_0x146dc5=_0x4c3a95(_0x29c42d(0x19d),_0x29c42d(0x1cf),((_0x4d93f8[_0x29c42d(0x218)]||'?')['trim']()[0x0]||'?')['toUpperCase']()),_0x351e95=_0x4c3a95(_0x29c42d(0x19d),'kfet');_0x351e95['appendChild'](_0x4c3a95('b',null,_0x4d93f8[_0x29c42d(0x218)]||'Untitled'));if(_0x56c502[_0x29c42d(0x1c8)])_0x351e95[_0x29c42d(0x1ad)](_0x4c3a95('span',null,_0x56c502[_0x29c42d(0x1c8)]));var _0x14b248=_0x4c3a95(_0x29c42d(0x19d),_0x29c42d(0x1fd));_0x14b248['innerHTML']=_0x29c42d(0x16a),_0x2d7f41[_0x29c42d(0x1ad)](_0x146dc5),_0x2d7f41[_0x29c42d(0x1ad)](_0x351e95),_0x2d7f41[_0x29c42d(0x1ad)](_0x14b248),_0x2d7f41[_0x29c42d(0x1a5)]=function(){_0x50f785(_0x4d93f8);},_0x3d00f8[_0x29c42d(0x1ad)](_0x2d7f41);});}_0x4258a8(_0x522885(0x1a1))&&_0x4258a8('kfQ')[_0x522885(0x216)]('input',_0x25e4bc);function _0x4f3ef8(){var _0x18d7a8=_0x522885;_0x4258a8(_0x18d7a8(0x16d))[_0x18d7a8(0x1f3)][_0x18d7a8(0x207)](_0x18d7a8(0x20a)),_0x4258a8(_0x18d7a8(0x1fc))['innerHTML']='';}_0x4258a8(_0x522885(0x16d))&&_0x4258a8(_0x522885(0x16d))[_0x522885(0x216)](_0x522885(0x195),function(_0xa497a2){var _0x101342=_0x522885;if(_0xa497a2['target']===_0x4258a8(_0x101342(0x16d)))_0x4f3ef8();});function _0x3b67a5(_0xbf7fca){var _0x52a40c=_0x522885,_0x2fa6c6=_0x4c3a95(_0x52a40c(0x159),_0x52a40c(0x192));return _0x2fa6c6[_0x52a40c(0x218)]=_0x52a40c(0x1d5),_0x2fa6c6[_0x52a40c(0x190)]=_0x52a40c(0x1b3),_0x2fa6c6['onclick']=function(_0x22b34a){var _0xadf9f3=_0x52a40c;_0x22b34a[_0xadf9f3(0x1d6)](),_0x31c134(_0xbf7fca);},_0x2fa6c6;}function _0x50f785(_0x20687f){var _0x4c43fb=_0x522885,_0x53a7fb=_0x3bdd05(_0x20687f),_0x29217f=_0x4258a8(_0x4c43fb(0x1fc));_0x29217f['innerHTML']='',_0x29217f['appendChild'](_0x4c3a95('h3',null,_0x20687f['title']||_0x4c43fb(0x170))),_0x29217f['appendChild'](_0x4c3a95(_0x4c43fb(0x19d),_0x4c43fb(0x1e4),_0x20687f[_0x4c43fb(0x161)]||_0x4c43fb(0x1b4)));function _0x2efaaa(_0x1582dd,_0x363363,_0x113e20,_0x5aca84){var _0x53b253=_0x4c43fb;if(!_0x363363)return;var _0x37ea3a=_0x4c3a95(_0x53b253(0x19d),_0x53b253(0x1df));_0x37ea3a[_0x53b253(0x1ad)](_0x4c3a95('div','kfk',_0x1582dd));var _0x258b6b=_0x4c3a95(_0x53b253(0x19d),'kfvrow'),_0x2af603=_0x4c3a95(_0x53b253(0x19d),_0x53b253(0x17e)+(_0x113e20?_0x53b253(0x1c0):'')),_0x4358f2=!_0x5aca84;_0x2af603['textContent']=_0x5aca84?_0x53b253(0x1c5):_0x363363,_0x258b6b[_0x53b253(0x1ad)](_0x2af603);if(_0x5aca84){var _0x4f3e54=_0x4c3a95(_0x53b253(0x159),'kfic');_0x4f3e54[_0x53b253(0x218)]=_0x53b253(0x21a),_0x4f3e54['innerHTML']=_0x53b253(0x189),_0x4f3e54['onclick']=function(_0x1162e2){var _0x497fbc=_0x53b253;_0x1162e2[_0x497fbc(0x1d6)](),_0x4358f2=!_0x4358f2,_0x2af603[_0x497fbc(0x202)]=_0x4358f2?_0x363363:_0x497fbc(0x1c5);},_0x258b6b[_0x53b253(0x1ad)](_0x4f3e54);}_0x258b6b[_0x53b253(0x1ad)](_0x3b67a5(_0x363363)),_0x37ea3a[_0x53b253(0x1ad)](_0x258b6b),_0x2af603[_0x53b253(0x215)][_0x53b253(0x210)]=_0x53b253(0x1e7),_0x2af603[_0x53b253(0x1a5)]=function(){var _0x15c912=_0x53b253;if(_0x5aca84&&!_0x4358f2)_0x4358f2=!![],_0x2af603[_0x15c912(0x202)]=_0x363363;else _0x31c134(_0x363363);},_0x29217f[_0x53b253(0x1ad)](_0x37ea3a);}_0x2efaaa('Username\x20/\x20email',_0x53a7fb[_0x4c43fb(0x1c8)],![],![]),_0x2efaaa('Password',_0x53a7fb[_0x4c43fb(0x1ed)],!![],!![]),_0x2efaaa('Website',_0x53a7fb[_0x4c43fb(0x169)],![],![]),_0x2efaaa('Notes',_0x53a7fb[_0x4c43fb(0x191)],![],![]);var _0xca9757=_0x4c3a95('div',_0x4c43fb(0x1ea)),_0x5e5772=_0x4c3a95(_0x4c43fb(0x159),_0x4c43fb(0x1a2),_0x4c43fb(0x18a));_0x5e5772[_0x4c43fb(0x1a5)]=_0x4f3ef8,_0xca9757[_0x4c43fb(0x1ad)](_0x5e5772),_0x29217f[_0x4c43fb(0x1ad)](_0xca9757),_0x4258a8(_0x4c43fb(0x16d))[_0x4c43fb(0x1f3)][_0x4c43fb(0x175)]('show');}function _0x41da5b(){var _0x12833a=_0x522885,_0x18773c=_0x4258a8(_0x12833a(0x1fc));_0x18773c[_0x12833a(0x190)]='',_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('h3',null,_0x12833a(0x165))),_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('div',_0x12833a(0x1e4),_0x12833a(0x1b4)));function _0x53ee2d(_0x2a4282,_0x3edbf4){var _0x1a5d21=_0x12833a,_0x4a0bca=_0x4c3a95(_0x1a5d21(0x171),_0x1a5d21(0x1af),_0x2a4282),_0x340f2f=_0x4c3a95('input',_0x1a5d21(0x17f));return _0x340f2f[_0x1a5d21(0x19f)]=_0x3edbf4||'',_0x18773c[_0x1a5d21(0x1ad)](_0x4a0bca),_0x18773c['appendChild'](_0x340f2f),_0x340f2f;}var _0x3b2988=_0x53ee2d(_0x12833a(0x204),_0x12833a(0x172)),_0x583a96=_0x53ee2d(_0x12833a(0x1e0),'');_0x18773c[_0x12833a(0x1ad)](_0x4c3a95('label',_0x12833a(0x1af),_0x12833a(0x20c)));var _0x5dc2ed=_0x4c3a95('div','kfvrow'),_0x29b13f=_0x4c3a95(_0x12833a(0x185),'kfinp');_0x29b13f['style'][_0x12833a(0x167)]='0',_0x5dc2ed[_0x12833a(0x1ad)](_0x29b13f);var _0x78d6b6=_0x4c3a95(_0x12833a(0x159),_0x12833a(0x192));_0x78d6b6[_0x12833a(0x218)]=_0x12833a(0x1b9),_0x78d6b6[_0x12833a(0x190)]=_0x12833a(0x217),_0x78d6b6['onclick']=function(){var _0x3825d2=_0x12833a,_0x3a4e93=_0x3825d2(0x1cb),_0x5d0480=crypto[_0x3825d2(0x1f1)](new Uint8Array(0x14)),_0x1bf49c='';for(var _0x2a50b2=0x0;_0x2a50b2<0x14;_0x2a50b2++)_0x1bf49c+=_0x3a4e93[_0x5d0480[_0x2a50b2]%_0x3a4e93[_0x3825d2(0x177)]];_0x29b13f[_0x3825d2(0x162)]=_0x1bf49c;},_0x5dc2ed[_0x12833a(0x1ad)](_0x78d6b6),_0x5dc2ed['style'][_0x12833a(0x167)]=_0x12833a(0x197),_0x18773c['appendChild'](_0x5dc2ed);var _0x7b2180=_0x53ee2d(_0x12833a(0x1ce),''),_0x4e836d=_0x53ee2d(_0x12833a(0x15f),''),_0x1ba45e=_0x4c3a95(_0x12833a(0x19d),_0x12833a(0x1d2));_0x18773c[_0x12833a(0x1ad)](_0x1ba45e);var _0x349e1e=_0x4c3a95('div',_0x12833a(0x1ea)),_0x28ec0c=_0x4c3a95('button',_0x12833a(0x1a2),_0x12833a(0x15e));_0x28ec0c['onclick']=_0x4f3ef8;var _0x3841e9=_0x4c3a95(_0x12833a(0x159),_0x12833a(0x1f5),_0x12833a(0x164));_0x3841e9[_0x12833a(0x1a5)]=function(){var _0x32208d=_0x12833a;if(!_0x3b2988[_0x32208d(0x162)][_0x32208d(0x196)]()&&!_0x29b13f[_0x32208d(0x162)]){_0x1ba45e['textContent']=_0x32208d(0x1ff);return;}_0x3841e9[_0x32208d(0x1a8)]=!![],_0x3841e9[_0x32208d(0x202)]=_0x32208d(0x1d3);var _0xefe377=Date[_0x32208d(0x1bc)](),_0x203850={'id':_0x10e473(),'type':_0x32208d(0x1b4),'title':_0x3b2988[_0x32208d(0x162)][_0x32208d(0x196)]()||_0x32208d(0x170),'data':{'username':_0x583a96[_0x32208d(0x162)][_0x32208d(0x196)](),'password':_0x29b13f[_0x32208d(0x162)],'url':_0x7b2180['value'][_0x32208d(0x196)](),'note':_0x4e836d[_0x32208d(0x162)]['trim']()},'created':_0xefe377,'updated':_0xefe377},_0x5f0509=_0x107d6e()[_0x32208d(0x206)]();_0x5f0509[_0x32208d(0x174)](_0x203850),_0x245163(_0x5f0509),_0x4fb4d2()[_0x32208d(0x176)](function(){var _0x31fbed=_0x32208d;_0x4f3ef8(),_0x25e4bc(),_0x55170f(_0x31fbed(0x1e1));},function(_0x5ae8a4){var _0xd38ae2=_0x32208d;_0x3841e9[_0xd38ae2(0x1a8)]=![],_0x3841e9[_0xd38ae2(0x202)]=_0xd38ae2(0x164),_0x1ba45e[_0xd38ae2(0x202)]=_0xd38ae2(0x1f9)+_0x5ae8a4[_0xd38ae2(0x1eb)];var _0x1ef570=_0x107d6e()[_0xd38ae2(0x1e5)](function(_0x466e78){return _0x466e78['id']!==_0x203850['id'];});_0x245163(_0x1ef570);});},_0x349e1e['appendChild'](_0x28ec0c),_0x349e1e[_0x12833a(0x1ad)](_0x3841e9),_0x18773c[_0x12833a(0x1ad)](_0x349e1e),_0x4258a8(_0x12833a(0x16d))[_0x12833a(0x1f3)]['add'](_0x12833a(0x20a)),setTimeout(function(){var _0x288564=_0x12833a;_0x3b2988[_0x288564(0x173)]();},0x3c);}_0x4258a8(_0x522885(0x1a0))&&(_0x4258a8(_0x522885(0x1a0))[_0x522885(0x1a5)]=_0x41da5b);function _0x4fb4d2(){var _0x50ded7=_0x522885,_0x3a787a=_0x5aca51[_0x50ded7(0x19a)];return _0x3a787a[_0x50ded7(0x15c)]=Date[_0x50ded7(0x1bc)](),_0x5aca51[_0x50ded7(0x186)]=_0x3a787a['savedAt'],_0x4faa0d(_0x5aca51[_0x50ded7(0x1f8)],_0x3a787a)[_0x50ded7(0x176)](function(_0x3790a1){var _0x40809f=_0x50ded7;return _0x28bc74(_0x40809f(0x1be),{'p_id':_0x5aca51['id'],'p_auth':_0x5aca51[_0x40809f(0x1fe)],'p_blob':_0x3790a1,'p_saved_at':_0x3a787a['savedAt']});});}function _0x494bb(){var _0x359312=_0x522885;if(_0x4258a8(_0x359312(0x16d))[_0x359312(0x1f3)][_0x359312(0x15d)]('show'))return;_0x28bc74(_0x359312(0x17a),{'p_id':_0x5aca51['id'],'p_auth':_0x5aca51['auth']})[_0x359312(0x176)](function(_0x5bbedd){var _0x584f39=_0x359312;if(_0x5bbedd&&_0x5bbedd[_0x584f39(0x18c)]&&_0x5bbedd[_0x584f39(0x18c)]>_0x5aca51[_0x584f39(0x186)]+0x1f4)return _0x498d40(_0x5aca51[_0x584f39(0x1f8)],_0x5bbedd[_0x584f39(0x166)])[_0x584f39(0x176)](function(_0x5f2dcb){var _0x4095cd=_0x584f39;_0x5aca51[_0x4095cd(0x19a)]=_0x5f2dcb,_0x5aca51['saved']=_0x5bbedd[_0x4095cd(0x18c)],_0x25e4bc(),_0x55170f(_0x4095cd(0x1a4));});})[_0x359312(0x1d4)](function(){});}function _0x554905(){var _0xc209ff=_0x522885;clearInterval(_0x5aca51['poll']),_0x5aca51[_0xc209ff(0x19a)]=null,_0x5aca51['id']=_0x5aca51[_0xc209ff(0x1fe)]=_0x5aca51['key']=null,_0x5aca51[_0xc209ff(0x186)]=0x0,_0x50c2ea[_0xc209ff(0x184)](function(_0x37ee6a){var _0x5b58c3=_0xc209ff;_0x37ee6a[_0x5b58c3(0x162)]='';}),_0x4258a8(_0xc209ff(0x180))[_0xc209ff(0x202)]='',_0x4258a8(_0xc209ff(0x18d))['hidden']=!![],_0x4258a8(_0xc209ff(0x213))[_0xc209ff(0x219)]=![];try{_0x4258a8('open')[_0xc209ff(0x208)]({'behavior':_0xc209ff(0x1d9),'block':'start'});}catch(_0x22ebbc){}}_0x4258a8('kfLock')&&(_0x4258a8(_0x522885(0x1b0))[_0x522885(0x1a5)]=_0x554905),_0x4258a8('kfClear')&&(_0x4258a8(_0x522885(0x1dc))['onclick']=function(){var _0x81a05e=_0x522885;_0x50c2ea[_0x81a05e(0x184)](function(_0x2d13e1){var _0x5715e2=_0x81a05e;_0x2d13e1[_0x5715e2(0x162)]='';}),_0x4258a8(_0x81a05e(0x180))['textContent']='',_0x50c2ea[0x0][_0x81a05e(0x173)]();}),_0x4258a8(_0x522885(0x1f4))&&(_0x4258a8(_0x522885(0x1f4))['onclick']=_0xc9f609);}()));
-</script>
-
-<script>
-
-/* Guided download flow: detect device -> choose method -> paste one command
-   (downloads + clears the macOS quarantine flag + opens), or download the
-   app with a live progress bar. No secrets here, so it stays readable. */
 (function(){
-  var DEV={
-    silicon:{name:"Mac · Apple Silicon",os:"mac",cmdrx:"aarch64\\.app\\.tar\\.gz$",filerx:"aarch64.*\\.dmg$|_aarch64\\.dmg$"},
-    intel:{name:"Mac · Intel",os:"mac",cmdrx:"x64\\.app\\.tar\\.gz$",filerx:"x64.*\\.dmg$|x86_64.*\\.dmg$"},
-    windows:{name:"Windows",os:"win",filerx:"\\.msi$"},
-    linux:{name:"Linux",os:"linux",filerx:"\\.AppImage$"}
-  };
-  var ORDER=["silicon","intel","windows","linux"];
-  var RELEASES="https://github.com/Semtexhigh/keyflow/releases/latest";
-  var assets={},relTag="";
-  function $(id){return document.getElementById(id)}
-  function pick(rx){if(!rx)return null;for(var n in assets){if(new RegExp(rx,"i").test(n))return assets[n];}return null}
-  function fmt(b){if(!b)return"";var m=b/1048576;return(m>=1?m.toFixed(1)+" MB":Math.round(b/1024)+" KB")}
-
-  function detect(){
-    var p=(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||"",ua=navigator.userAgent||"";
-    if(/Mac/i.test(p)||/Mac OS X/i.test(ua)){
-      var intel=/Intel/i.test(ua)&&/Mac OS X 10_(9|10|11|12|13|14)/.test(ua);
-      return intel?"intel":"silicon";
-    }
-    if(/Win/i.test(p)||/Windows/i.test(ua))return"windows";
-    if(/Linux/i.test(p)||/Linux/i.test(ua)&&!/Android/i.test(ua))return"linux";
-    return"silicon";
+  var REPO="Semtexhigh/keyflow";
+  var RELEASES="https://github.com/"+REPO+"/releases";
+  var ua=navigator.userAgent||"";
+  var os = /Windows/i.test(ua)?"win" : (/Mac/i.test(ua)?"mac" : (/Linux|X11/i.test(ua)?"linux":"other"));
+  var assets=[], latestTag="";
+  function pick(re){ for(var i=0;i<assets.length;i++){ if(re.test(assets[i].name)) return assets[i]; } return null; }
+  function setPrimary(a,label,meta){ var b=document.getElementById("dlBtn"); if(a){ b.href=a.url; document.getElementById("dlLabel").textContent=label; document.getElementById("dlMeta").textContent=meta||""; } else { b.href=RELEASES; document.getElementById("dlLabel").textContent="Download"; document.getElementById("dlMeta").textContent="all releases"; } }
+  function sizeMB(n){ return n? (Math.round(n/1048576*10)/10)+" MB":""; }
+  function build(){
+    // macOS note only for mac
+    if(os==="mac"){ document.getElementById("macNote").style.display="block"; }
+    var arm=pick(/aarch64\.dmg$/i)||pick(/arm64\.dmg$/i), intel=pick(/x64\.dmg$/i)||pick(/x86_64\.dmg$/i);
+    var exe=pick(/-setup\.exe$/i)||pick(/\.exe$/i), msi=pick(/\.msi$/i);
+    var appimg=pick(/\.AppImage$/i), deb=pick(/\.deb$/i), rpm=pick(/\.rpm$/i);
+    if(os==="mac"){ setPrimary(arm||intel,"Download for macOS",(arm?".dmg · Apple Silicon":".dmg · universal")+(arm&&arm.size?(" · "+sizeMB(arm.size)):"")); if(intel){ document.getElementById("intelWrap").style.display="block"; document.getElementById("intelBtn").onclick=function(){ location.href=intel.url; }; } }
+    else if(os==="win"){ setPrimary(exe||msi,"Download for Windows",(exe?".exe installer":".msi")); }
+    else if(os==="linux"){ setPrimary(appimg||deb||rpm,"Download for Linux",(appimg?".AppImage":(deb?".deb":".rpm"))); }
+    else { setPrimary(null); }
+    // modal list
+    var order=[["macOS · Apple Silicon",arm],["macOS · Intel",intel],["Windows · installer",exe],["Windows · MSI",msi],["Linux · AppImage",appimg],["Linux · Debian/Ubuntu",deb],["Linux · Fedora/RHEL",rpm]];
+    var pl=document.getElementById("plist"); pl.innerHTML="";
+    var any=false;
+    order.forEach(function(p){ if(p[1]){ any=true; var a=document.createElement("a"); a.className="prow"; a.href=p[1].url; a.setAttribute("rel","noopener");
+      a.innerHTML='<span class="l">'+p[0]+'</span><span class="r">'+p[1].name.split("/").pop()+(p[1].size?(" · "+sizeMB(p[1].size)):"")+'</span>'; pl.appendChild(a); } });
+    if(!any){ var a=document.createElement("a"); a.className="prow"; a.href=RELEASES; a.innerHTML='<span class="l">Open the releases page</span><span class="r">github ↗</span>'; pl.appendChild(a); }
+    if(latestTag){ document.getElementById("verChip").textContent=latestTag; document.getElementById("modalVer").textContent="latest release · "+latestTag; }
   }
-  var sel=detect();
-
-  // resolve the newest release's assets
-  fetch("https://api.github.com/repos/Semtexhigh/keyflow/releases/latest")
-    .then(function(r){if(!r.ok)throw 0;return r.json()})
-    .then(function(rel){(rel.assets||[]).forEach(function(a){assets[a.name]=a.browser_download_url});relTag=rel.tag_name||""})
-    .catch(function(){});
-
-  function view(v){document.querySelectorAll("#dlSheet .dlview").forEach(function(el){el.hidden=(el.getAttribute("data-v")!==v)})}
-  function openFlow(){buildChips();view("device");$("dlOv").classList.add("show")}
-  function closeFlow(){$("dlOv").classList.remove("show")}
-
-  function buildChips(){
-    var box=$("dlChips");box.innerHTML="";
-    ORDER.forEach(function(k){
-      var b=document.createElement("button");b.className="dlchip"+(k===sel?" sel":"");
-      b.innerHTML="<b>"+DEV[k].name.split(" · ")[0]+"</b><span>"+(DEV[k].name.indexOf("·")>0?DEV[k].name.split("·")[1].trim():"&nbsp;")+"</span>";
-      b.onclick=function(){sel=k;buildChips()};
-      box.appendChild(b);
+  // fetch latest release assets client-side
+  fetch("https://api.github.com/repos/"+REPO+"/releases/latest",{headers:{Accept:"application/vnd.github+json"}})
+    .then(function(r){ return r.ok? r.json() : Promise.reject(); })
+    .then(function(j){ latestTag=j.tag_name||""; assets=(j.assets||[]).map(function(a){return {name:a.name,url:a.browser_download_url,size:a.size};}); build(); })
+    .catch(function(){ // fallback: no API — point everything at releases page
+      document.getElementById("dlBtn").href=RELEASES; document.getElementById("dlLabel").textContent="Download"; document.getElementById("dlMeta").textContent="all releases";
+      if(os==="mac")document.getElementById("macNote").style.display="block";
+      var pl=document.getElementById("plist"); pl.innerHTML='<a class="prow" href="'+RELEASES+'" rel="noopener"><span class="l">Open the releases page</span><span class="r">github ↗</span></a>';
     });
-  }
-
-  function cmdFor(k){
-    var d=DEV[k];
-    if(d.os==="mac"){
-      // version-less asset names -> GitHub's stable latest/download URL, no API needed
-      var nm=(k==="intel")?"Keyflow_x64.app.tar.gz":"Keyflow_aarch64.app.tar.gz";
-      var u="https://github.com/Semtexhigh/keyflow/releases/latest/download/"+nm;
-      return 'mkdir -p ~/Applications && cd ~/Applications && curl -#L "'+u+'" | tar xz && xattr -dr com.apple.quarantine Keyflow.app && open Keyflow.app';
-    }
-    if(d.os==="win"){
-      var m=pick(d.filerx)||RELEASES;
-      return '$o="$env:TEMP\\Keyflow.msi"; iwr "'+m+'" -OutFile $o; msiexec /i $o';
-    }
-    var a=pick(d.filerx)||RELEASES;
-    return 'cd ~/Downloads && curl -#L "'+a+'" -o Keyflow.AppImage && chmod +x Keyflow.AppImage && ./Keyflow.AppImage';
-  }
-
-  function showCli(){
-    var k=sel,d=DEV[k];
-    $("dlCliDev").textContent=d.name;
-    if(d.os==="mac"){
-      $("dlStep1").textContent="Open Terminal — it’s already on your Mac. Press ⌘ and the space bar, type Terminal, and press Return.";
-      $("dlStep2txt").textContent="Paste this and press Return. It downloads Keyflow, clears the macOS “unidentified developer” flag for you, and opens the app — no security prompt.";
-      $("dlHint").textContent="A live progress bar shows in Terminal while it downloads"+(relTag?" ("+relTag+")":"")+". If it ever says permission denied, your Mac is locked down — use “Download the app” instead.";
-    } else if(d.os==="win"){
-      $("dlStep1").textContent="Open PowerShell. Press the Windows key, type PowerShell, and press Enter.";
-      $("dlStep2txt").textContent="Paste this and press Enter. It downloads Keyflow and starts the installer — click through it, and Windows won’t flag it as an unknown download.";
-      $("dlHint").textContent="A progress bar shows in PowerShell while it downloads"+(relTag?" ("+relTag+")":"")+".";
-    } else {
-      $("dlStep1").textContent="Open your terminal.";
-      $("dlStep2txt").textContent="Paste this and press Enter. It downloads the AppImage, makes it runnable, and launches it.";
-      $("dlHint").textContent="A live progress bar shows while it downloads"+(relTag?" ("+relTag+")":"")+".";
-    }
-    $("dlCmd").textContent=cmdFor(k);
-    var cp=$("dlCopy");cp.textContent="Copy";cp.classList.remove("done");
-    view("cli");
-  }
-
-  function startDownload(){
-    var k=sel,d=DEV[k];
-    var url=pick(d.filerx),name=null;
-    for(var n in assets){if(new RegExp(d.filerx,"i").test(n)){name=n;break}}
-    $("dlDlDev").textContent=d.name;
-    $("dlDlTitle").textContent="Downloading…";
-    $("dlBarFill").style.width="0%";$("dlPct").textContent="Starting…";$("dlDlHint").textContent="";
-    view("dl");
-    if(!url){ // release not resolved; send them to the releases page
-      $("dlDlTitle").textContent="Opening the downloads page…";
-      $("dlPct").textContent="";$("dlBarFill").parentNode.style.display="none";
-      window.open(RELEASES,"_blank");return;
-    }
-    $("dlBarFill").parentNode.style.display="";
-    stream(url,name||"Keyflow");
-  }
-
-  function stream(url,name){
-    (async function(){
-      try{
-        var res=await fetch(url);
-        if(!res.ok||!res.body)throw 0;
-        var total=+res.headers.get("content-length")||0,got=0,chunks=[];
-        var reader=res.body.getReader();
-        for(;;){
-          var r=await reader.read();if(r.done)break;
-          chunks.push(r.value);got+=r.value.length;
-          if(total){var p=Math.round(got/total*100);$("dlBarFill").style.width=p+"%";$("dlPct").textContent=p+"% · "+fmt(got)+" / "+fmt(total);}
-          else{$("dlPct").textContent=fmt(got)+" downloaded";}
-        }
-        $("dlBarFill").style.width="100%";$("dlPct").textContent="Done · "+fmt(got);
-        var blob=new Blob(chunks),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
-        setTimeout(function(){URL.revokeObjectURL(a.href)},5000);
-        $("dlDlTitle").textContent="Saved to your Downloads";
-        $("dlDlHint").textContent=DEV[sel].os==="mac"?"Open "+name+", drag Keyflow to Applications, then right-click it and choose Open the first time. (The command-line option skips that step.)":"Open "+name+" to install Keyflow.";
-      }catch(e){
-        // fall back to a normal browser download
-        var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-        $("dlBarFill").parentNode.style.display="none";$("dlPct").textContent="";
-        $("dlDlTitle").textContent="Your download is starting…";
-        $("dlDlHint").innerHTML='If nothing happens, <a href="'+url+'" style="color:var(--fg)">click here to download</a>.';
-      }
-    })();
-  }
-
-  // wiring
-  document.addEventListener("click",function(e){
-    var g=e.target.closest&&e.target.closest("#get");
-    if(g){e.preventDefault();openFlow();}
-  });
-  $("dlOv")&&$("dlOv").addEventListener("click",function(e){if(e.target===$("dlOv"))closeFlow()});
-  $("dlContinue")&&($("dlContinue").onclick=function(){$("dlDevName").textContent=DEV[sel].name;view("method")});
-  $("dlCli")&&($("dlCli").onclick=showCli);
-  $("dlApp")&&($("dlApp").onclick=startDownload);
-  $("dlBack1")&&($("dlBack1").onclick=function(){view("device")});
-  $("dlBack2")&&($("dlBack2").onclick=function(){view("method")});
-  $("dlBack3")&&($("dlBack3").onclick=function(){view("method")});
-  $("dlCopy")&&($("dlCopy").onclick=function(){
-    var t=$("dlCmd").textContent;
-    (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t):Promise.reject())
-      .catch(function(){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;top:-1000px";document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();})
-      .then(function(){var c=$("dlCopy");c.textContent="Copied";c.classList.add("done");setTimeout(function(){c.textContent="Copy";c.classList.remove("done")},1600)});
-  });
-})();
-
-</script>
-
-<script>
-(function(){
-  var SPHERE_COL="#ffffff";
-  /* ---- theme ---- */
-  function applyTheme(t){
-    document.body.dataset.theme=t;
-    try{localStorage.setItem("kf-theme",t)}catch(e){}
-    var n=document.getElementById("themeName"); if(n) n.textContent=(t==="gold"?"GOLD":"MONO");
-    SPHERE_COL=(t==="gold")?"#f5cf3e":"#ffffff";
-  }
-  var saved="mono"; try{saved=localStorage.getItem("kf-theme")||"mono"}catch(e){}
-  applyTheme(saved==="gold"?"gold":"mono");
-  var tb=document.getElementById("themeBtn");
-  if(tb) tb.onclick=function(){ applyTheme(document.body.dataset.theme==="gold"?"mono":"gold"); };
-
-  /* ---- detected OS label ---- */
-  (function(){
-    var p=(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||"",ua=navigator.userAgent||"",os="macOS";
-    if(/Win/i.test(p)||/Windows/i.test(ua))os="Windows";
-    else if(/Mac/i.test(p)||/Mac OS X/i.test(ua))os="macOS";
-    else if(/Linux/i.test(p)||/Linux/i.test(ua))os="Linux";
-    var el=document.getElementById("detOS"); if(el) el.textContent=os;
-  })();
-
-  /* ---- tabs ---- */
-  document.querySelectorAll(".tab").forEach(function(t){
-    t.onclick=function(){
-      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on")});
-      t.classList.add("on");
-      var k=t.getAttribute("data-tab");
-      document.querySelectorAll(".panel").forEach(function(p){p.hidden=(p.getAttribute("data-panel")!==k)});
-    };
-  });
-
-  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-
-  /* ---- node sphere ---- */
-  (function(){
-    var cv=document.getElementById("sphere"); if(!cv) return;
-    var ctx=cv.getContext("2d"), DPR=Math.min(window.devicePixelRatio||1,2);
-    var N=92, pts=[];
-    for(var i=0;i<N;i++){ var y=1-(i/(N-1))*2, r=Math.sqrt(Math.max(0,1-y*y)), th=i*2.399963229;
-      pts.push([Math.cos(th)*r, y, Math.sin(th)*r]); }
-    var edges=[];
-    for(var a=0;a<N;a++)for(var b=a+1;b<N;b++){
-      var d=pts[a][0]*pts[b][0]+pts[a][1]*pts[b][1]+pts[a][2]*pts[b][2];
-      if(d>0.55) edges.push([a,b]);
-    }
-    var W,H,R,cx,cy;
-    function size(){ var box=cv.getBoundingClientRect();
-      W=cv.width=Math.max(2,box.width*DPR); H=cv.height=Math.max(2,box.height*DPR);
-      cx=W/2; cy=H/2; R=Math.min(W,H)*0.44; }
-    size(); window.addEventListener("resize",size);
-    var ang=0, tilt=0.42, ct=Math.cos(tilt), st=Math.sin(tilt);
-    function draw(){
-      ctx.clearRect(0,0,W,H);
-      if(!reduce) ang+=0.0016;
-      var ca=Math.cos(ang), sa=Math.sin(ang), col=SPHERE_COL, proj=new Array(N);
-      for(var i=0;i<N;i++){ var p=pts[i];
-        var x=p[0]*ca - p[2]*sa, z=p[0]*sa + p[2]*ca, y=p[1];
-        var y2=y*ct - z*st, z2=y*st + z*ct;
-        proj[i]=[cx+x*R, cy+y2*R, z2];
-      }
-      ctx.lineWidth=1*DPR; ctx.strokeStyle=col;
-      for(var e=0;e<edges.length;e++){ var A=proj[edges[e][0]], B=proj[edges[e][1]];
-        var al=((A[2]+B[2])/2+1)/2; ctx.globalAlpha=0.07+al*0.42;
-        ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke(); }
-      ctx.shadowBlur=8*DPR; ctx.shadowColor=col; ctx.fillStyle=col;
-      for(var n=0;n<N;n++){ var P=proj[n], al=(P[2]+1)/2;
-        ctx.globalAlpha=0.25+al*0.75;
-        ctx.beginPath();ctx.arc(P[0],P[1],(0.7+al*1.9)*DPR,0,6.2832);ctx.fill(); }
-      ctx.shadowBlur=0; ctx.globalAlpha=1;
-      requestAnimationFrame(draw);
-    }
-    draw();
-  })();
-
-  /* ---- matrix rain (gold theme only) ---- */
-  (function(){
-    var cv=document.getElementById("matrix"); if(!cv) return;
-    var ctx=cv.getContext("2d"), DPR=Math.min(window.devicePixelRatio||1,2);
-    var W,H,cols,drops,fs=15;
-    var chars="0123456789ABCDEF<>/\\|{}$#*+=".split("");
-    function size(){ W=cv.width=window.innerWidth*DPR; H=cv.height=window.innerHeight*DPR;
-      cols=Math.max(1,Math.floor(W/(fs*DPR))); drops=[]; for(var i=0;i<cols;i++) drops[i]=Math.random()*-60; }
-    size(); window.addEventListener("resize",size);
-    function frame(){
-      if(document.body.dataset.theme!=="gold" || reduce){ ctx.clearRect(0,0,W,H); requestAnimationFrame(frame); return; }
-      ctx.fillStyle="rgba(6,5,1,0.09)"; ctx.fillRect(0,0,W,H);
-      ctx.font=(fs*DPR)+"px 'IBM Plex Mono',monospace";
-      for(var i=0;i<cols;i++){
-        var ch=chars[(Math.random()*chars.length)|0];
-        var x=i*fs*DPR, y=drops[i]*fs*DPR;
-        ctx.fillStyle="rgba(245,207,62,"+(Math.random()*0.45+0.12)+")";
-        ctx.fillText(ch,x,y);
-        if(y>H && Math.random()>0.975) drops[i]=0; else drops[i]+=0.5;
-      }
-      requestAnimationFrame(frame);
-    }
-    frame();
-  })();
+  // modal wiring
+  document.getElementById("allBtn").onclick=function(){ document.getElementById("scrim").classList.add("open"); };
+  document.getElementById("closeBtn").onclick=function(){ document.getElementById("scrim").classList.remove("open"); };
+  document.getElementById("scrim").onclick=function(e){ if(e.target===this) this.classList.remove("open"); };
 })();
 </script>
-</body>
-</html>
+</body></html>
