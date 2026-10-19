@@ -1,98 +1,175 @@
-<!doctype html><html lang="en"><head>
+<!doctype html><html lang="en" data-theme="dark"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Keyflow — encrypted password manager</title>
 <meta name="description" content="Keyflow — an encrypted password manager. Your passwords across every device, secured by a seed phrase and a key that never leaves your machine. No account, no email.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--mono:"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;--sans:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--ok:#3ecf8e;--line:#1e1e1e;--line2:#262626;--mut:#8a8a8a}
-html,body{background:#000;color:#ededed;font-family:var(--sans);-webkit-font-smoothing:antialiased}
-body{min-height:100vh;overflow-x:hidden}
-.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1000px 520px at 50% -160px,#161616 0%,#000 58%)}
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:28px 28px 60px}
+:root{
+  --mono:"SF Mono",ui-monospace,"DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --ac:#3ecf8e;--ac2:#9be7bf;--line:#1e1e1e;--line2:#262626;--mut:#8a8a8a;--mut2:#6a6a6a;
+  --bg:#000;--card:#0e0e0e;--ink:#ededed;--glow:#3ecf8e;
+}
+:root[data-theme="gold"]{
+  --ac:#e8b923;--ac2:#f6d87a;--glow:#e8b923;--ink:#f3ecd8;--card:#0d0b06;--line:#2a2410;--line2:#3a3115;--mut:#9a8f6a;--mut2:#6e653f;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;overflow-x:hidden;transition:color .2s}
+.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1000px 520px at 50% -160px,color-mix(in srgb,var(--glow) 14%,#000) 0%,#000 58%)}
+:root[data-theme="gold"] .glow{background:radial-gradient(1000px 560px at 50% -120px,#1c1606 0%,#000 60%)}
+.gridlines{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .25s}
+:root[data-theme="gold"] .gridlines{opacity:.5;background-image:repeating-linear-gradient(0deg,#e8b9230a 0 1px,#0000 1px 46px),repeating-linear-gradient(90deg,#e8b9230a 0 1px,#0000 1px 46px)}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 28px 40px}
 header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px}
-.logo{width:34px;height:34px;border-radius:9px;background:#fff;color:#000;display:grid;place-items:center}.logo svg{width:17px;height:17px}
-.wm{font-family:var(--mono);letter-spacing:.34em;font-size:13px;color:#cfcfcf}
-.nav{display:flex;gap:26px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--mut)}
-.nav span::before{content:"◆ ";color:var(--ok)}
-@media(max-width:760px){.nav{display:none}}
-.ver{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line);border-radius:999px;padding:9px 15px}
-main{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;margin-top:52px}
-@media(max-width:900px){main{grid-template-columns:1fr;gap:34px}}
+.logo{width:34px;height:34px;border-radius:9px;background:#fff;color:#000;display:grid;place-items:center}
+:root[data-theme="gold"] .logo{background:var(--ac);color:#1a1400}
+.logo svg{width:17px;height:17px}
+.wm{font-family:var(--mono);letter-spacing:.34em;font-size:13px;color:var(--ink)}
+.nav{display:flex;gap:24px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--mut)}
+.nav a{color:var(--mut);text-decoration:none}.nav a:hover{color:var(--ink)}
+@media(max-width:820px){.nav{display:none}}
+.hgroup{display:flex;align-items:center;gap:10px}
+.themebtn{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink);border:1px solid var(--line2);background:var(--card);border-radius:999px;padding:8px 13px;cursor:pointer}
+.themebtn:hover{border-color:color-mix(in srgb,var(--ac) 50%,var(--line2))}
+.themebtn .sw{width:26px;height:14px;border-radius:999px;background:#222;position:relative;border:1px solid var(--line2)}
+.themebtn .sw i{position:absolute;top:1px;left:1px;width:10px;height:10px;border-radius:50%;background:var(--ac);transition:left .15s}
+:root[data-theme="gold"] .themebtn .sw i{left:13px}
+.ver{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:9px 14px}
+/* hero */
+main{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;margin-top:46px}
+@media(max-width:900px){main{grid-template-columns:1fr;gap:32px}}
 .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:8px 16px}
-.eyebrow .d{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
-h1{font-size:72px;line-height:.98;letter-spacing:-.025em;font-weight:800;margin-top:24px}
-@media(max-width:900px){h1{font-size:54px}}
-h1 .mut{color:#6a6a6a}
-.sub{margin-top:24px;max-width:520px;font-size:17px;line-height:1.65;color:#b4b4b4}
-.cta{display:flex;gap:14px;margin-top:34px;align-items:center;flex-wrap:wrap}
+.eyebrow .d{width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
+h1{font-size:68px;line-height:.98;letter-spacing:-.025em;font-weight:800;margin-top:22px}
+@media(max-width:900px){h1{font-size:50px}}
+h1 .mut{color:var(--mut2)}
+:root[data-theme="gold"] h1 .hi{color:var(--ac)}
+.sub{margin-top:22px;max-width:520px;font-size:17px;line-height:1.65;color:color-mix(in srgb,var(--ink) 72%,#000)}
+.cta{display:flex;gap:14px;margin-top:30px;align-items:center;flex-wrap:wrap}
 .dl{display:flex;align-items:center;gap:12px;background:#fff;color:#000;border-radius:14px;padding:16px 26px;font-weight:700;text-decoration:none;font-family:var(--sans);border:none;cursor:pointer}
-.dl:hover{background:#eaeaea}
+:root[data-theme="gold"] .dl{background:var(--ac);color:#1a1400}
+.dl:hover{opacity:.92}
 .dl svg{width:20px;height:20px}
 .dl .s{font-family:var(--mono);font-size:11px;font-weight:400;color:#444}
-.alt{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line2);border-radius:14px;padding:16px 20px;background:#0c0c0c;cursor:pointer}
-.alt:hover{border-color:#3a3a3a}
-.intel{font-family:var(--mono);font-size:12px;color:var(--mut);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none}
-.intel:hover{color:#cfcfcf}
-.badges{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
-.badge{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:8px 14px}
-.badge b{color:#cfcfcf}
-.note{margin-top:22px;max-width:520px;font-family:var(--mono);font-size:11px;line-height:1.7;color:#7a7a7a;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#0a0a0a}
-.note b{color:#cfcfcf}
-.note code{background:#151515;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:#cfcfcf}
-/* preview */
+:root[data-theme="gold"] .dl .s{color:#5c4a00}
+.ghostbtn{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink);border:1px solid var(--line2);border-radius:14px;padding:16px 20px;background:var(--card);cursor:pointer}
+.ghostbtn:hover{border-color:color-mix(in srgb,var(--ac) 50%,var(--line2))}
+.intel{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--mut);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;display:none}
+.intel:hover{color:var(--ink)}
+/* cli inline */
+.cli{margin-top:18px;max-width:560px;background:#070707;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+:root[data-theme="gold"] .cli{background:#0a0803}
+.cli .code{flex:1;font-family:var(--mono);font-size:12px;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cli .code .p{color:var(--ac)}
+.cli .cp{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:7px 10px;cursor:pointer;background:var(--card)}
+.cli .cp:hover{border-color:color-mix(in srgb,var(--ac) 50%,var(--line2))}
+.badges{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:8px 14px}
+.badge b{color:var(--ink)}
+.note{margin-top:20px;max-width:540px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--mut);border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#0a0a0a;display:none}
+.note b{color:var(--ink)}.note code{background:#151515;border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:var(--ink)}
+/* app preview panel */
 .preview{border:1px solid var(--line);border-radius:22px;background:#070707;padding:20px;box-shadow:0 50px 100px -40px #000}
-.pbar{display:flex;align-items:center;gap:7px;margin-bottom:16px}
-.pbar i{width:10px;height:10px;border-radius:50%;background:#222}
-.pbar .t{margin-left:12px;font-family:var(--mono);font-size:11px;color:#6a6a6a}
+.pbar{display:flex;align-items:center;gap:7px;margin-bottom:16px}.pbar i{width:10px;height:10px;border-radius:50%;background:#222}.pbar .t{margin-left:12px;font-family:var(--mono);font-size:11px;color:var(--mut2)}
 .mtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .mtitle{font-size:20px;font-weight:800;letter-spacing:.08em}
-.cloudchip{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#cfcfcf;border:1px solid var(--line);background:#0c0c0c;border-radius:999px;padding:6px 11px}
-.cloudchip .d{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok)}
+.cloudchip{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink);border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 11px}
+.cloudchip .d{width:6px;height:6px;border-radius:50%;background:var(--ac);box-shadow:0 0 7px var(--ac)}
 .vgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .vc{background:linear-gradient(180deg,#0e0e0e,#080808);border:1px solid var(--line);border-radius:12px;padding:14px;min-height:104px;display:flex;flex-direction:column}
-.vc.hl{border-color:#2f3f38}
-.vc .vi{width:28px;height:28px;border-radius:8px;background:#151515;border:1px solid var(--line2);display:grid;place-items:center;margin-bottom:10px}
-.vc .vi svg{width:14px;height:14px;color:#fff}
+.vc.hl{border-color:color-mix(in srgb,var(--ac) 40%,var(--line))}
+.vc .vi{width:28px;height:28px;border-radius:8px;background:#151515;border:1px solid var(--line2);display:grid;place-items:center;margin-bottom:10px}.vc .vi svg{width:14px;height:14px;color:var(--ink)}
 .vc .nm{font-size:15px;font-weight:700}.vc .mt{font-family:var(--mono);font-size:10px;color:var(--mut);margin-top:4px}
 .vc .op{margin-top:auto;font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--mut);display:flex;justify-content:space-between;border-top:1px solid #161616;padding-top:8px}
-.vc.add{align-items:center;justify-content:center;border-style:dashed;color:var(--mut);font-family:var(--mono);font-size:10px;letter-spacing:.12em}
-.vc.add .pl{font-size:18px;margin-bottom:5px;font-weight:300}
-footer{position:relative;z-index:1;max-width:1180px;margin:40px auto 0;padding:18px 28px 36px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#5f5f5f}
-footer a{color:#8a8a8a;text-decoration:none}footer a:hover{color:#cfcfcf}
-/* platforms modal */
-.scrim{position:fixed;inset:0;z-index:30;background:#000a;display:none;place-items:center;padding:24px}
-.scrim.open{display:grid}
-.modal{width:100%;max-width:520px;background:linear-gradient(180deg,#0e0e0e,#080808);border:1px solid var(--line);border-radius:18px;padding:24px}
-.modal h3{font-size:19px;font-weight:700}
-.modal .ml{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--mut)}
-.plist{margin-top:16px;display:flex;flex-direction:column;gap:9px}
-.prow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-decoration:none;color:#ededed}
-.prow:hover{border-color:#2f3f38}
-.prow .l{font-size:14px}.prow .r{font-family:var(--mono);font-size:11px;color:var(--mut)}
-.closebtn{margin-top:18px;width:100%;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:#cfcfcf;border:1px solid var(--line2);border-radius:12px;padding:12px;background:#0c0c0c;cursor:pointer}
+.vc.add{align-items:center;justify-content:center;border-style:dashed;color:var(--mut);font-family:var(--mono);font-size:10px;letter-spacing:.12em}.vc.add .pl{font-size:18px;margin-bottom:5px;font-weight:300}
+/* sections */
+.sec{margin-top:70px}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.sectag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--mut2)}
+.sectitle{font-size:30px;font-weight:800;letter-spacing:-.01em}
+.secsub{font-family:var(--mono);font-size:12px;color:var(--mut)}
+/* download cards */
+.dcards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:820px){.dcards{grid-template-columns:1fr}}
+.dcard{position:relative;background:linear-gradient(180deg,#0e0e0e,#070707);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column}
+.dcard.detected{border-color:color-mix(in srgb,var(--ac) 45%,var(--line));box-shadow:0 0 36px -18px var(--ac)}
+.detbadge{position:absolute;top:16px;right:16px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#000;background:var(--ac);border-radius:6px;padding:4px 8px;display:none}
+.dcard.detected .detbadge{display:block}
+.dcard .os{display:flex;align-items:center;gap:12px}
+.dcard .osi{width:44px;height:44px;border-radius:12px;background:#141414;border:1px solid var(--line2);display:grid;place-items:center}.dcard .osi svg{width:24px;height:24px;color:var(--ink)}
+.dcard .osn{font-size:20px;font-weight:700}.dcard .osm{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px}
+.dcard .files{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.dcard .f{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0b0b0b;border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-decoration:none;color:var(--ink)}
+.dcard .f:hover{border-color:color-mix(in srgb,var(--ac) 40%,var(--line))}
+.dcard .f .l{font-family:var(--mono);font-size:12px}.dcard .f .r{font-family:var(--mono);font-size:10px;color:var(--mut)}
+.dcard .primary{margin-top:14px;text-align:center;background:#fff;color:#000;border-radius:11px;padding:12px;font-weight:700;text-decoration:none;font-size:14px}
+:root[data-theme="gold"] .dcard .primary{background:var(--ac);color:#1a1400}
+/* command line section */
+.term{background:#070707;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.termbar{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.termbar i{width:10px;height:10px;border-radius:50%;background:#222}.termbar .t{margin-left:10px;font-family:var(--mono);font-size:11px;color:var(--mut2)}
+.termbar .tabs{margin-left:auto;display:flex;gap:6px}
+.termtab{font-family:var(--mono);font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;background:var(--card)}
+.termtab.on{color:var(--ink);border-color:color-mix(in srgb,var(--ac) 45%,var(--line))}
+.termbody{padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--ink);overflow-x:auto}
+.termbody .c{color:var(--mut)}.termbody .p{color:var(--ac)}
+.termbody .cp{float:right;font-size:10px;letter-spacing:.08em;color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:6px 10px;cursor:pointer;background:var(--card)}
+/* cloud databases */
+.ctiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+@media(max-width:820px){.ctiles{grid-template-columns:1fr 1fr}}
+.ctile{display:flex;gap:12px;align-items:flex-start}
+.tbox{width:46px;height:46px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;flex:none}.tbox svg{width:20px;height:20px;color:var(--ink)}
+.tk{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--mut2)}.tv{font-size:17px;font-weight:600;margin-top:5px}.tv.ac{color:var(--ac)}
+.mapwrap{position:relative;border:1px solid var(--line);border-radius:18px;height:400px;overflow:hidden;background:#070707}
+.mapimg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%}.dotimg{display:block;width:100%;opacity:.85}
+.node{position:absolute;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%)}
+.node .core{position:absolute;inset:3px;border-radius:50%;background:var(--ac);box-shadow:0 0 12px var(--ac)}
+.node .ring{position:absolute;inset:-6px;border:1.5px solid color-mix(in srgb,var(--ac) 40%,transparent);border-radius:50%}
+.node.bk .core{background:#cfcfcf;box-shadow:0 0 10px #ffffff88}.node.bk .ring{border-color:#ffffff33}
+.noderow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+@media(max-width:820px){.noderow{grid-template-columns:1fr}}
+.nc{background:linear-gradient(180deg,#0e0e0e,#080808);border:1px solid var(--line);border-radius:14px;padding:16px}
+.nc.primary{border-color:color-mix(in srgb,var(--ac) 35%,var(--line));box-shadow:0 0 30px -16px var(--ac)}
+.nctop{display:flex;align-items:center;gap:11px}.ncflag{font-size:20px}.ncname{font-size:15px;font-weight:700}
+.ncrole{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#000;background:var(--ac);border-radius:5px;padding:3px 7px;margin-left:auto}
+.ncrole.bk{background:#1b1b1b;color:#bdbdbd;border:1px solid var(--line2)}
+.ncsub{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:7px}
+.ncstats{display:flex;justify-content:space-between;margin-top:12px;font-family:var(--mono);font-size:12px}
+.ncstats .k{color:var(--mut2);font-size:10px}.ncstats .v{color:var(--ink);margin-top:4px;font-weight:600}
+.health{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid #171717;font-family:var(--mono);font-size:11px;color:var(--ac)}
+.health .d{width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
+.health.heal{color:#f0b43a}.health.heal .d{background:#f0b43a;box-shadow:0 0 8px #f0b43a}
+.cloudnote{margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--mut)}
+footer{position:relative;z-index:1;max-width:1180px;margin:60px auto 0;padding:18px 28px 40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--mut2)}
+footer a{color:var(--mut);text-decoration:none}footer a:hover{color:var(--ink)}
 </style></head>
 <body>
-<div class="glow"></div>
+<div class="glow"></div><div class="gridlines"></div>
 <div class="wrap">
  <header>
   <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span class="wm">KEYFLOW</span></div>
-  <div class="nav"><span>SECURE</span><span>CLOUD-SYNCED</span><span>ZERO-KNOWLEDGE</span></div>
-  <span class="ver" id="verChip">latest</span>
+  <div class="nav"><a href="#download">Download</a><a href="#cloud">Cloud sync</a><a href="#databases">Databases</a><a href="#cli">Command line</a></div>
+  <div class="hgroup">
+   <button class="themebtn" id="themeBtn"><span class="sw"><i></i></span><span id="themeLbl">OLD UI</span></button>
+   <span class="ver" id="verChip">latest</span>
+  </div>
  </header>
+
  <main>
   <section>
    <div class="eyebrow"><span class="d"></span>AES-256 · ENCRYPTED ON YOUR DEVICE</div>
-   <h1>Your passwords,<br>every device,<br><span class="mut">one key.</span></h1>
-   <p class="sub">An encrypted password manager with no account and no email. A seed phrase is your login and your key — it is derived on your device and the cloud only ever holds ciphertext.</p>
+   <h1>Your passwords,<br>every device,<br><span class="mut hi">one key.</span></h1>
+   <p class="sub">An encrypted password manager with no account and no email. A seed phrase is your login and your key — derived on your device, synced across your own cloud as ciphertext only.</p>
    <div class="cta">
     <a class="dl" id="dlBtn" href="#" rel="noopener"><svg id="dlIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 13.2c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.6zM14.5 6.3c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg><span id="dlLabel">Download</span><span class="s" id="dlMeta"></span></a>
-    <button class="alt" id="allBtn">ALL PLATFORMS ↓</button>
+    <button class="ghostbtn" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">ALL PLATFORMS ↓</button>
    </div>
-   <div id="intelWrap" style="margin-top:12px;display:none"><button class="intel" id="intelBtn">Using an Intel Mac? Download the Intel build</button></div>
+   <button class="intel" id="intelBtn">Using an Intel Mac? Download the Intel build</button>
+   <div class="cli"><span class="code" id="cliInline"><span class="p">$</span> <span id="cliCmd">curl -fsSL keyflow… </span></span><button class="cp" id="cliCopy">COPY</button></div>
    <div class="badges"><span class="badge"><b>macOS 11+</b> · Apple Silicon &amp; Intel</span><span class="badge"><b>Windows</b> · Linux</span><span class="badge">cloud sync · <b>recoverable</b></span></div>
-   <div class="note" id="macNote" style="display:none"><b>macOS note:</b> builds are unsigned, so on first launch macOS may say the app is "damaged" or from an unidentified developer. Right-click the app → <b>Open</b> → <b>Open Anyway</b>, or clear the quarantine flag once: <code>xattr -dr com.apple.quarantine /Applications/Keyflow.app</code></div>
+   <div class="note" id="macNote"><b>macOS note:</b> builds are unsigned, so first launch may say the app is "damaged". Right-click → <b>Open</b> → <b>Open Anyway</b>, or run <code>xattr -dr com.apple.quarantine /Applications/Keyflow.app</code></div>
   </section>
   <section class="preview">
    <div class="pbar"><i></i><i></i><i></i><span class="t">Keyflow</span></div>
@@ -105,63 +182,147 @@ footer a{color:#8a8a8a;text-decoration:none}footer a:hover{color:#cfcfcf}
    </div>
   </section>
  </main>
+
+ <!-- DOWNLOAD CARDS -->
+ <section class="sec" id="download">
+  <div class="sechead"><div><div class="sectag">01 · DOWNLOAD</div><div class="sectitle">Pick your platform</div></div><div class="secsub" id="dlVer">latest release</div></div>
+  <div class="dcards">
+   <div class="dcard" id="card-mac"><span class="detbadge">DETECTED</span>
+    <div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.7 13.2c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.3 1.2-2.5 1.3-2.6-.1 0-2.5-1-2.5-3.6zM14.5 6.3c.6-.8 1-1.9.9-3-.9 0-2 .6-2.7 1.4-.6.7-1.1 1.8-.9 2.9 1 .1 2-.5 2.7-1.3z"/></svg></span><div><div class="osn">macOS</div><div class="osm">11+ · Apple Silicon &amp; Intel</div></div></div>
+    <div class="files" id="files-mac"></div>
+    <a class="primary" id="prim-mac" href="#">Download .dmg</a>
+   </div>
+   <div class="dcard" id="card-win"><span class="detbadge">DETECTED</span>
+    <div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l7.5-1v7H3zM11.5 4.3L21 3v8.4h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg></span><div><div class="osn">Windows</div><div class="osm">10 / 11 · x64</div></div></div>
+    <div class="files" id="files-win"></div>
+    <a class="primary" id="prim-win" href="#">Download installer</a>
+   </div>
+   <div class="dcard" id="card-linux"><span class="detbadge">DETECTED</span>
+    <div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3c-1 1.5-1 4 0 6-2 1-3 3-3 5 0 3 2.5 5 6 5s6-2 6-5c0-2-1-4-3-5 1-2 1-4.5 0-6"/><circle cx="10" cy="8" r=".6" fill="currentColor"/><circle cx="14" cy="8" r=".6" fill="currentColor"/></svg></span><div><div class="osn">Linux</div><div class="osm">AppImage · deb · rpm</div></div></div>
+    <div class="files" id="files-linux"></div>
+    <a class="primary" id="prim-linux" href="#">Download AppImage</a>
+   </div>
+  </div>
+ </section>
+
+ <!-- COMMAND LINE -->
+ <section class="sec" id="cli">
+  <div class="sechead"><div><div class="sectag">02 · COMMAND LINE</div><div class="sectitle">Install from the terminal</div></div><div class="secsub">auto-detects your OS · pulls the latest release</div></div>
+  <div class="term">
+   <div class="termbar"><i></i><i></i><i></i><span class="t" id="termWhich">your system</span>
+     <div class="tabs"><span class="termtab" data-os="mac">macOS</span><span class="termtab" data-os="win">Windows</span><span class="termtab" data-os="linux">Linux</span></div>
+   </div>
+   <div class="termbody"><button class="cp" id="termCopy">COPY</button><div id="termText"><span class="c"># fetching latest release…</span></div></div>
+  </div>
+ </section>
+
+ <!-- CLOUD SYNC (app UI) -->
+ <section class="sec" id="cloud">
+  <div class="sechead"><div><div class="sectag">03 · CLOUD SYNC</div><div class="sectitle">One seed phrase. Every device.</div></div><div class="secsub">no account · no email · recoverable</div></div>
+  <div class="dcards">
+   <div class="dcard"><div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></span><div><div class="osn">Create vault</div><div class="osm">generates a 12-word seed</div></div></div>
+     <p style="margin-top:14px;font-size:14px;line-height:1.6;color:var(--mut)">A brand-new encrypted vault. The seed phrase is shown once — it is your login and your key, and it never leaves your device.</p></div>
+   <div class="dcard"><div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h10M4 17h7"/><circle cx="19" cy="15" r="3"/><path d="M19 10V7"/></svg></span><div><div class="osn">Restore with seed</div><div class="osm">bring it back anywhere</div></div></div>
+     <p style="margin-top:14px;font-size:14px;line-height:1.6;color:var(--mut)">Enter your 12 words on a new device. The cloud finds your vault by the account ID derived from them and re-downloads your encrypted entries.</p></div>
+   <div class="dcard"><div class="os"><span class="osi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 18a5 5 0 0 1 0-10 6 6 0 0 1 11.3 2A4 4 0 0 1 18 18z"/></svg></span><div><div class="osn">Initialize cloud</div><div class="osm">switch a vault to the cloud</div></div></div>
+     <p style="margin-top:14px;font-size:14px;line-height:1.6;color:var(--mut)">Turn on cloud sync for a vault and it mirrors across regions automatically. Unlock daily with Touch ID, Face ID, a PIN or a password.</p></div>
+  </div>
+ </section>
+
+ <!-- DATABASES -->
+ <section class="sec" id="databases">
+  <div class="sechead"><div><div class="sectag">04 · YOUR DATA, EVERYWHERE</div><div class="sectitle">Mirrored across regions</div></div><div class="secsub">one node can fail — nothing is lost</div></div>
+  <div class="ctiles">
+   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div><div><div class="tk">NODES ONLINE</div><div class="tv ac">3 / 3</div></div></div>
+   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M20 4v5h-5M4 20v-5h5"/></svg></div><div><div class="tk">REPLICATION</div><div class="tv ac">In sync</div></div></div>
+   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg></div><div><div class="tk">AT REST</div><div class="tv">Ciphertext</div></div></div>
+   <div class="ctile"><div class="tbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v13H4z"/><path d="M4 7l2-3h12l2 3"/></svg></div><div><div class="tk">HISTORY</div><div class="tv">Every version</div></div></div>
+  </div>
+  <div class="mapwrap">
+   <div class="mapimg"><img class="dotimg" src="dotmap.png">
+    <div class="node bk" style="left:28.48%;top:29.07%"><span class="ring"></span><span class="core"></span></div>
+    <div class="node bk" style="left:52.41%;top:20.81%"><span class="ring"></span><span class="core"></span></div>
+    <div class="node" style="left:88.8%;top:31.58%"><span class="ring"></span><span class="core"></span></div>
+   </div>
+  </div>
+  <div class="noderow">
+   <div class="nc primary"><div class="nctop"><span class="ncflag">🇯🇵</span><span class="ncname">Node A</span><span class="ncrole">PRIMARY</span></div><div class="ncsub">Northeast Asia · Tokyo</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">38 ms</div></div><div><div class="k">DISK</div><div class="v">14%</div></div><div><div class="k">VAULTS</div><div class="v">live</div></div><div><div class="k">ENTRIES</div><div class="v">synced</div></div></div><div class="health"><span class="d"></span>HEALTHY · up to date</div></div>
+   <div class="nc"><div class="nctop"><span class="ncflag">🇩🇪</span><span class="ncname">Node B</span><span class="ncrole bk">BACKUP</span></div><div class="ncsub">Europe · Frankfurt</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">61 ms</div></div><div><div class="k">DISK</div><div class="v">14%</div></div><div><div class="k">VAULTS</div><div class="v">mirror</div></div><div><div class="k">ENTRIES</div><div class="v">synced</div></div></div><div class="health"><span class="d"></span>HEALTHY · mirror of A</div></div>
+   <div class="nc"><div class="nctop"><span class="ncflag">🇺🇸</span><span class="ncname">Node C</span><span class="ncrole bk">BACKUP</span></div><div class="ncsub">US East · Virginia</div><div class="ncstats"><div><div class="k">LATENCY</div><div class="v">120 ms</div></div><div><div class="k">DISK</div><div class="v">13%</div></div><div><div class="k">VAULTS</div><div class="v">mirror</div></div><div><div class="k">ENTRIES</div><div class="v">healing</div></div></div><div class="health heal"><span class="d"></span>HEALING · re-pushing from A</div></div>
+  </div>
+  <div class="cloudnote">The cloud stores ciphertext only — decrypted on your device with the key from your seed phrase. The live node dashboard lives inside the app.</div>
+ </section>
 </div>
 <footer>
  <span>KEYFLOW — ENCRYPTED PASSWORD MANAGER</span>
  <span>NO ACCOUNT · NO EMAIL · YOU HOLD THE KEY · <a id="relLink" href="https://github.com/Semtexhigh/keyflow/releases" target="_blank" rel="noopener">all releases</a></span>
 </footer>
 
-<div class="scrim" id="scrim">
- <div class="modal">
-  <h3>All platforms</h3>
-  <div class="ml" id="modalVer">latest release</div>
-  <div class="plist" id="plist"><div class="prow"><span class="l">Loading installers…</span></div></div>
-  <button class="closebtn" id="closeBtn">CLOSE</button>
- </div>
-</div>
-
 <script>
 (function(){
   var REPO="Semtexhigh/keyflow";
-  var RELEASES="https://github.com/"+REPO+"/releases";
+  var RAW="https://github.com/"+REPO+"/releases";
   var ua=navigator.userAgent||"";
-  var os = /Windows/i.test(ua)?"win" : (/Mac/i.test(ua)?"mac" : (/Linux|X11/i.test(ua)?"linux":"other"));
-  var assets=[], latestTag="";
-  function pick(re){ for(var i=0;i<assets.length;i++){ if(re.test(assets[i].name)) return assets[i]; } return null; }
-  function setPrimary(a,label,meta){ var b=document.getElementById("dlBtn"); if(a){ b.href=a.url; document.getElementById("dlLabel").textContent=label; document.getElementById("dlMeta").textContent=meta||""; } else { b.href=RELEASES; document.getElementById("dlLabel").textContent="Download"; document.getElementById("dlMeta").textContent="all releases"; } }
-  function sizeMB(n){ return n? (Math.round(n/1048576*10)/10)+" MB":""; }
-  function build(){
-    // macOS note only for mac
-    if(os==="mac"){ document.getElementById("macNote").style.display="block"; }
-    var arm=pick(/aarch64\.dmg$/i)||pick(/arm64\.dmg$/i), intel=pick(/x64\.dmg$/i)||pick(/x86_64\.dmg$/i);
-    var exe=pick(/-setup\.exe$/i)||pick(/\.exe$/i), msi=pick(/\.msi$/i);
-    var appimg=pick(/\.AppImage$/i), deb=pick(/\.deb$/i), rpm=pick(/\.rpm$/i);
-    if(os==="mac"){ setPrimary(arm||intel,"Download for macOS",(arm?".dmg · Apple Silicon":".dmg · universal")+(arm&&arm.size?(" · "+sizeMB(arm.size)):"")); if(intel){ document.getElementById("intelWrap").style.display="block"; document.getElementById("intelBtn").onclick=function(){ location.href=intel.url; }; } }
-    else if(os==="win"){ setPrimary(exe||msi,"Download for Windows",(exe?".exe installer":".msi")); }
-    else if(os==="linux"){ setPrimary(appimg||deb||rpm,"Download for Linux",(appimg?".AppImage":(deb?".deb":".rpm"))); }
-    else { setPrimary(null); }
-    // modal list
-    var order=[["macOS · Apple Silicon",arm],["macOS · Intel",intel],["Windows · installer",exe],["Windows · MSI",msi],["Linux · AppImage",appimg],["Linux · Debian/Ubuntu",deb],["Linux · Fedora/RHEL",rpm]];
-    var pl=document.getElementById("plist"); pl.innerHTML="";
-    var any=false;
-    order.forEach(function(p){ if(p[1]){ any=true; var a=document.createElement("a"); a.className="prow"; a.href=p[1].url; a.setAttribute("rel","noopener");
-      a.innerHTML='<span class="l">'+p[0]+'</span><span class="r">'+p[1].name.split("/").pop()+(p[1].size?(" · "+sizeMB(p[1].size)):"")+'</span>'; pl.appendChild(a); } });
-    if(!any){ var a=document.createElement("a"); a.className="prow"; a.href=RELEASES; a.innerHTML='<span class="l">Open the releases page</span><span class="r">github ↗</span>'; pl.appendChild(a); }
-    if(latestTag){ document.getElementById("verChip").textContent=latestTag; document.getElementById("modalVer").textContent="latest release · "+latestTag; }
+  var os=/Windows/i.test(ua)?"win":(/Mac/i.test(ua)?"mac":(/Linux|X11/i.test(ua)?"linux":"other"));
+  var assets=[],tag="";
+  function pick(re){for(var i=0;i<assets.length;i++){if(re.test(assets[i].name))return assets[i];}return null;}
+  function mb(n){return n?(Math.round(n/1048576*10)/10)+" MB":"";}
+  var A={};
+  function fill(){
+    A.arm=pick(/aarch64\.dmg$/i)||pick(/arm64\.dmg$/i); A.intel=pick(/x64\.dmg$/i)||pick(/x86_64\.dmg$/i);
+    A.exe=pick(/-setup\.exe$/i)||pick(/\.exe$/i); A.msi=pick(/\.msi$/i);
+    A.appimg=pick(/\.AppImage$/i); A.deb=pick(/\.deb$/i); A.rpm=pick(/\.rpm$/i);
+    // hero primary
+    var b=document.getElementById("dlBtn"),L=document.getElementById("dlLabel"),M=document.getElementById("dlMeta");
+    function setP(a,lab,meta){ if(a){b.href=a.url;L.textContent=lab;M.textContent=meta;} else {b.href=RAW;L.textContent="Download";M.textContent="all releases";} }
+    if(os==="mac"){setP(A.arm||A.intel,"Download for macOS",(A.arm?".dmg · Apple Silicon":".dmg · universal")+(A.arm&&A.arm.size?" · "+mb(A.arm.size):""));document.getElementById("macNote").style.display="block"; if(A.intel){var iw=document.getElementById("intelBtn");iw.style.display="inline";iw.onclick=function(){location.href=A.intel.url;};}}
+    else if(os==="win"){setP(A.exe||A.msi,"Download for Windows",A.exe?".exe installer":".msi");}
+    else if(os==="linux"){setP(A.appimg||A.deb||A.rpm,"Download for Linux",A.appimg?".AppImage":(A.deb?".deb":".rpm"));}
+    else {setP(null);}
+    // cards
+    function card(id,list,prim,primLabel){ var el=document.getElementById(id); el.innerHTML=""; var any=false;
+      list.forEach(function(p){ if(p[1]){any=true; var a=document.createElement("a"); a.className="f"; a.href=p[1].url; a.rel="noopener"; a.innerHTML='<span class="l">'+p[0]+'</span><span class="r">'+(p[1].size?mb(p[1].size):"")+'</span>'; el.appendChild(a);} });
+      if(!any){ el.innerHTML='<a class="f" href="'+RAW+'"><span class="l">releases page</span><span class="r">↗</span></a>'; }
+      if(prim){prim.el.href=prim.a?prim.a.url:RAW; prim.el.textContent=primLabel;}
+    }
+    card("files-mac",[["Apple Silicon (.dmg)",A.arm],["Intel (.dmg)",A.intel]],{el:document.getElementById("prim-mac"),a:A.arm||A.intel},"Download .dmg");
+    card("files-win",[["Installer (.exe)",A.exe],["MSI (.msi)",A.msi]],{el:document.getElementById("prim-win"),a:A.exe||A.msi},"Download installer");
+    card("files-linux",[["AppImage",A.appimg],["Debian / Ubuntu (.deb)",A.deb],["Fedora / RHEL (.rpm)",A.rpm]],{el:document.getElementById("prim-linux"),a:A.appimg||A.deb||A.rpm},"Download AppImage");
+    // detected card highlight
+    var map={mac:"card-mac",win:"card-win",linux:"card-linux"}; if(map[os])document.getElementById(map[os]).classList.add("detected");
+    if(tag){document.getElementById("verChip").textContent=tag;document.getElementById("dlVer").textContent="latest release · "+tag;}
+    buildCli(os);
   }
-  // fetch latest release assets client-side
+  // command-line snippets
+  function cmdFor(o){
+    var dmg=(A.arm||A.intel), exe=(A.exe||A.msi), lin=(A.appimg||A.deb||A.rpm);
+    if(o==="mac"){ var u=dmg?dmg.url:RAW; return ['# download + open the latest macOS build','curl -L -o ~/Downloads/Keyflow.dmg "'+u+'"','xattr -dr com.apple.quarantine ~/Downloads/Keyflow.dmg','open ~/Downloads/Keyflow.dmg']; }
+    if(o==="win"){ var u2=exe?exe.url:RAW; return ['# PowerShell — download + run the installer','iwr -Uri "'+u2+'" -OutFile "$env:TEMP\\KeyflowSetup.exe"','Start-Process "$env:TEMP\\KeyflowSetup.exe"']; }
+    var u3=lin?lin.url:RAW; return ['# download + run the AppImage','curl -L -o Keyflow.AppImage "'+u3+'"','chmod +x Keyflow.AppImage','./Keyflow.AppImage'];
+  }
+  function buildCli(o){
+    var lines=cmdFor(o);
+    var t=document.getElementById("termText"); t.innerHTML="";
+    lines.forEach(function(l){ var d=document.createElement("div"); if(l.charAt(0)==="#"){d.innerHTML='<span class="c">'+l+'</span>';} else {d.innerHTML='<span class="p">$</span> '+l.replace(/&/g,'&amp;').replace(/</g,'&lt;');} t.appendChild(d); });
+    document.getElementById("termWhich").textContent=(o==="mac"?"macOS":o==="win"?"Windows":"Linux");
+    var plain=lines.filter(function(l){return l.charAt(0)!=="#";}).join("\n");
+    document.getElementById("termCopy").onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(plain);this.textContent="COPIED";var s=this;setTimeout(function(){s.textContent="COPY";},1200);};
+    // inline hero cli = first real command
+    var first=lines.filter(function(l){return l.charAt(0)!=="#";})[0]||"";
+    document.getElementById("cliCmd").textContent=(first.length>52?first.slice(0,52)+"…":first);
+    document.getElementById("cliCopy").onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(first);this.textContent="COPIED";var s=this;setTimeout(function(){s.textContent="COPY";},1200);};
+    [].forEach.call(document.querySelectorAll(".termtab"),function(tb){tb.classList.toggle("on",tb.getAttribute("data-os")===o);tb.onclick=function(){buildCli(tb.getAttribute("data-os"));};});
+  }
+  // theme toggle (black <-> old gold)
+  var tb=document.getElementById("themeBtn");
+  function applyTheme(t){ document.documentElement.setAttribute("data-theme",t); document.getElementById("themeLbl").textContent=(t==="gold"?"NEW UI":"OLD UI"); try{localStorage.setItem("kf-theme",t);}catch(e){} }
+  try{ var saved=localStorage.getItem("kf-theme"); if(saved)applyTheme(saved); }catch(e){}
+  tb.onclick=function(){ applyTheme(document.documentElement.getAttribute("data-theme")==="gold"?"dark":"gold"); };
+  // fetch latest release
   fetch("https://api.github.com/repos/"+REPO+"/releases/latest",{headers:{Accept:"application/vnd.github+json"}})
-    .then(function(r){ return r.ok? r.json() : Promise.reject(); })
-    .then(function(j){ latestTag=j.tag_name||""; assets=(j.assets||[]).map(function(a){return {name:a.name,url:a.browser_download_url,size:a.size};}); build(); })
-    .catch(function(){ // fallback: no API — point everything at releases page
-      document.getElementById("dlBtn").href=RELEASES; document.getElementById("dlLabel").textContent="Download"; document.getElementById("dlMeta").textContent="all releases";
-      if(os==="mac")document.getElementById("macNote").style.display="block";
-      var pl=document.getElementById("plist"); pl.innerHTML='<a class="prow" href="'+RELEASES+'" rel="noopener"><span class="l">Open the releases page</span><span class="r">github ↗</span></a>';
-    });
-  // modal wiring
-  document.getElementById("allBtn").onclick=function(){ document.getElementById("scrim").classList.add("open"); };
-  document.getElementById("closeBtn").onclick=function(){ document.getElementById("scrim").classList.remove("open"); };
-  document.getElementById("scrim").onclick=function(e){ if(e.target===this) this.classList.remove("open"); };
+   .then(function(r){return r.ok?r.json():Promise.reject();})
+   .then(function(j){ tag=j.tag_name||""; assets=(j.assets||[]).map(function(a){return{name:a.name,url:a.browser_download_url,size:a.size};}); fill(); })
+   .catch(function(){ fill(); });
 })();
 </script>
 </body></html>
