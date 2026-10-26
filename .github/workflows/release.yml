@@ -1,0 +1,36 @@
+name: Publish release
+on:
+  push:
+    branches: [downloads]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Apple-Silicon .dmg from the app bundle
+        run: |
+          set -e
+          if ls *aarch64.dmg >/dev/null 2>&1; then
+            echo "aarch64 dmg already present"; exit 0
+          fi
+          test -f Keyflow_aarch64.app.tar.gz
+          VER=$(sed 's/^v//' TAG)
+          rm -rf stage && mkdir stage
+          tar -xzf Keyflow_aarch64.app.tar.gz -C stage
+          xattr -cr stage/Keyflow.app 2>/dev/null || true
+          ln -s /Applications stage/Applications
+          hdiutil create -volname "Keyflow" -srcfolder stage -ov -format UDZO "Keyflow_${VER}_aarch64.dmg"
+          rm -rf stage
+          ls -lh Keyflow_${VER}_aarch64.dmg
+      - name: Create the release the download button points at
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG=$(cat TAG)
+          gh release delete "$TAG" -R "$GITHUB_REPOSITORY" -y 2>/dev/null || true
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --target main --latest -t "Keyflow $TAG" \
+            -n "Download the installer for your computer. macOS: open the .dmg and drag Keyflow to Applications. The first time, right-click Keyflow and choose Open (it is not signed with an Apple certificate). If macOS says it is damaged, run this once in Terminal: xattr -dr com.apple.quarantine /Applications/Keyflow.app" \
+            *.dmg *.msi *.exe *.AppImage *.deb *.rpm *.app.tar.gz
