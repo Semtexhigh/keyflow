@@ -1220,7 +1220,17 @@ body[data-theme="jarvis"] #jarvisFx canvas{ filter:none!important }
 body[data-theme="jarvis"] .lock{ background:rgba(2,8,15,.35)!important }
 @media (prefers-reduced-motion:reduce){ body[data-theme="jarvis"] .row,body[data-theme="jarvis"] .tabbar,body[data-theme="jarvis"] .jtilt{ transition:none!important } }
 </style>
-</head>
+<style id="kfShape">
+/* Rounded corners: a fixed mask paints the four corners away, above everything */
+#kfCorners{ display:none; position:fixed; inset:0; z-index:9500; pointer-events:none; border-radius:22px; box-shadow:0 0 0 60px #000 }
+body[data-round="1"] #kfCorners{ display:block }
+body[data-theme="light"][data-round="1"] #kfCorners{ box-shadow:0 0 0 60px #d9dde3 }
+body[data-theme="jarvis"][data-round="1"] #kfCorners{ box-shadow:0 0 0 60px #000,inset 0 0 0 1.5px rgba(var(--jcr),.85),inset 0 0 18px rgba(var(--jcr),.35) }
+/* 3D motion: the app leans away toward the corner the pointer is in */
+body[data-motion="1"] #app,body[data-motion="1"] .lock{ transform:perspective(1600px) rotateX(var(--mrx,0deg)) rotateY(var(--mry,0deg)); transform-origin:50% 50%; transition:transform .25s ease-out }
+body[data-motion="1"]:not([data-theme="jarvis"]) .tabbar{ transform:translateX(-50%) perspective(900px) rotateX(var(--mrx,0deg)) rotateY(var(--mry,0deg)); transition:transform .25s ease-out }
+@media (prefers-reduced-motion:reduce){ body[data-motion="1"] #app,body[data-motion="1"] .lock,body[data-motion="1"] .tabbar{ transform:none!important } }
+</style></head>
 <body data-theme="mono" data-density="comfortable">
 
 <!-- ============ BOOT ============ -->
@@ -1780,6 +1790,8 @@ body[data-theme="jarvis"] .lock{ background:rgba(2,8,15,.35)!important }
           <div class="jsw" id="jarvisSwatches" role="group" aria-label="Jarvis colour"></div>
           <div class="hint" id="jarvisHint">pick a colour to switch Jarvis mode on · press J any time to switch it on or off</div>
         </div>
+        <div class="row-tgl"><div class="lab"><b>Rounded corners</b><span>curves the corners of the whole app</span></div><div class="tgl" id="setRound" role="switch" tabindex="0" aria-checked="false" aria-label="Rounded corners"></div></div>
+        <div class="row-tgl"><div class="lab"><b>3D motion</b><span>the app tilts with your pointer — the corner you move to leans away</span></div><div class="tgl" id="setMotion3d" role="switch" tabindex="0" aria-checked="false" aria-label="3D motion"></div></div>
         <div class="field"><label>App icon</label>
           <div class="swatches" id="markSwatches"></div>
           <div class="hint" id="markLab">the mark on the lock screen and the app icon</div>
@@ -4828,7 +4840,7 @@ var FileStore=(function(){
 var State={ key:null, vault:null, which:null, meta:null, vaultId:null, locked:true,
   idleTimer:null, dirty:false, saveError:null, lastCopyAt:0, _wt:null, _saving:false };
 
-var DEFAULT_SETTINGS={ theme:"mono", jarvisAccent:"cyan", textSize:"m", density:"comfortable", autolock:180, lockHide:false, browserCopy:true, autosave:true,
+var DEFAULT_SETTINGS={ theme:"mono", jarvisAccent:"cyan", textSize:"m", density:"comfortable", autolock:180, lockHide:false, browserCopy:true, autosave:true, roundCorners:false, motion3d:false,
   /* appMark is a preset id from MARKS, or "custom", in which case the
      picture lives in appMarkImg as a 160px PNG data URL. */
   appMark:"cube", appMarkImg:"", appTile:"auto",
@@ -9064,6 +9076,8 @@ function applySettings(){
   document.body.setAttribute("data-density",s.density||"comfortable");
   document.body.setAttribute("data-text",s.textSize||"m");
   document.body.setAttribute("data-jaccent",s.jarvisAccent||"cyan");
+  document.body.setAttribute("data-round",s.roundCorners?"1":"0");
+  try{ if(window.__kfMotion) window.__kfMotion(!!s.motion3d); }catch(e){}
   try{ if(window.__jarvisRecolor) window.__jarvisRecolor(); }catch(e){}
   applyMark();
   var meta=document.querySelector('meta[name="theme-color"]');
@@ -9155,6 +9169,8 @@ function renderSettings(){
   }
   setTgl("setDensity", s.density==="compact");
   setTgl("setLockHide", s.lockHide);
+  setTgl("setRound", !!s.roundCorners);
+  setTgl("setMotion3d", !!s.motion3d);
   setTgl("setAutosave", s.autosave);
   setTgl("setQuick", s.quickActions!==false);
   setTgl("setAutofill", s.autofill!==false);
@@ -9817,6 +9833,8 @@ function bindSettings(){
     }
   }, true);
   bindToggle("setLockHide",function(v){ State.meta.settings.lockHide=!!v; markDirty(); saveVault(true); }, false);
+  bindToggle("setRound",function(v){ State.meta.settings.roundCorners=!!v; applySettings(); markDirty(); saveVault(true); }, false);
+  bindToggle("setMotion3d",function(v){ State.meta.settings.motion3d=!!v; applySettings(); markDirty(); saveVault(true); toast(v?"3D motion on — move the pointer to a corner":"3D motion off"); }, false);
   bindToggle("setAutosave",function(v){ State.meta.settings.autosave=!!v; markDirty(); saveVault(true); toast(v?"Auto-save on":"Auto-save off — use Save now"); }, true);
   bindToggle("setQuick",function(v){ State.meta.settings.quickActions=!!v; markDirty(); saveVault(true); renderQuiet(); }, true);
   bindToggle("setAutofill",function(v){
@@ -12503,6 +12521,19 @@ document.addEventListener("visibilitychange",function(){ if(document.hidden) sto
 window.__jarvisFx=function(theme){ if(!document.body) return; if(theme==="jarvis") start(); else off(); };
 window.__jarvisRecolor=function(){ if(cv) readColor(); };
 if(on()) start();
+})();
+</script>
+<div id="kfCorners" aria-hidden="true"></div>
+<script>
+/* 3D motion: corner under the pointer leans back, the opposite one comes forward */
+(function(){ var on=false, req=0, x=0, y=0, MAX=6, R=document.documentElement;
+  function tick(){ req=0; var dx=x/window.innerWidth-.5, dy=y/window.innerHeight-.5;
+    R.style.setProperty("--mry",(dx*2*MAX).toFixed(2)+"deg"); R.style.setProperty("--mrx",(-dy*2*MAX).toFixed(2)+"deg"); }
+  function mv(e){ x=e.clientX; y=e.clientY; if(!req) req=requestAnimationFrame(tick); }
+  function lv(){ R.style.setProperty("--mrx","0deg"); R.style.setProperty("--mry","0deg"); }
+  window.__kfMotion=function(v){ v=!!v; if(document.body) document.body.setAttribute("data-motion",v?"1":"0"); if(v===on) return; on=v;
+    if(v){ window.addEventListener("pointermove",mv,{passive:true}); document.addEventListener("pointerleave",lv); }
+    else { window.removeEventListener("pointermove",mv); document.removeEventListener("pointerleave",lv); lv(); } };
 })();
 </script>
 <a id="kfBack" href="./" aria-label="Back to the Keyflow site" style="position:fixed;top:14px;left:16px;z-index:9001;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:9px;font:600 12.5px -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#fff;text-decoration:none;background:rgba(20,20,20,.75);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">&#8249; Back to site</a>
